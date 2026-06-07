@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>双十订单纠纷 · 数据指纹 学习训练台</title>
+<style>
+  :root{
+    --paper:#f3ecdd; --paper-2:#ece3d0; --card:#fbf7ee;
+    --ink:#211c15; --ink-soft:#564c3e; --ink-faint:#8a7d68;
+    --line:#d8cbb1; --line-strong:#c4b496;
+    --a:#a8552f; --b:#3a6470; --seal:#8c2b22; --gold:#8c7038;
+    --sell:#3a6470; --buy:#8c7038; --broker:#a8552f; --court:#5a5446; --alert:#8c2b22; --info:#6b6353;
+    --shadow:0 18px 50px rgba(40,30,15,.18), 0 2px 8px rgba(40,30,15,.10);
+    --serif:"Songti SC","Source Han Serif SC","Noto Serif CJK SC","SimSun",Georgia,serif;
+    --hei:"PingFang SC","Source Han Sans SC","Noto Sans CJK SC","Microsoft YaHei","Heiti SC","SimHei","Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box} html,body{margin:0;padding:0}
+  body{font-family:var(--serif); color:var(--ink); line-height:1.85; background:var(--paper);
+    background-image:radial-gradient(120% 80% at 50% -10%, rgba(255,250,238,.7), transparent 60%), linear-gradient(180deg,var(--paper),var(--paper-2));
+    -webkit-font-smoothing:antialiased; min-height:100vh; padding:0 16px 130px}
+  body::before{content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E")}
+  .wrap{position:relative; z-index:1; max-width:960px; margin:0 auto}
+
+  header.top{position:sticky; top:0; z-index:30; margin:0 -16px; padding:10px 16px 8px;
+    background:linear-gradient(180deg, rgba(243,236,221,.97), rgba(243,236,221,.88)); backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line); animation:drop .6s ease both}
+  .top-row{max-width:960px; margin:0 auto; display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .brand{font-family:var(--hei); font-weight:800; letter-spacing:.04em; font-size:14.5px}
+  .brand .dot{color:var(--seal)}
+  .verify{font-family:var(--hei); font-size:11px; color:#2e6b3e; border:1px solid #9cc0a4; background:#eef5ee; border-radius:999px; padding:3px 10px; white-space:nowrap}
+  .top-spacer{flex:1}
+  .ghost{font-family:var(--hei); font-size:12px; color:var(--ink-soft); background:transparent; border:1px solid var(--line-strong); border-radius:999px; padding:5px 11px; cursor:pointer; transition:.2s}
+  .ghost:hover{border-color:var(--ink-soft); color:var(--ink)}
+  .prog{max-width:960px; margin:9px auto 0; height:4px; background:var(--line); border-radius:4px; overflow:hidden}
+  .prog>i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--a),var(--gold),var(--b)); transition:width .4s}
+  nav.steps{max-width:960px; margin:9px auto 0; display:flex; gap:7px; overflow-x:auto; padding-bottom:4px; scrollbar-width:thin}
+  nav.steps::-webkit-scrollbar{height:5px} nav.steps::-webkit-scrollbar-thumb{background:var(--line-strong); border-radius:5px}
+  .chip{font-family:var(--hei); font-size:12px; color:var(--ink-soft); background:var(--card); border:1px solid var(--line); border-radius:999px; padding:6px 12px; cursor:pointer; white-space:nowrap; transition:.18s; display:flex; gap:6px; align-items:center}
+  .chip b{font-variant-numeric:tabular-nums; color:var(--ink-faint)}
+  .chip:hover{border-color:var(--line-strong)} .chip.active{background:var(--ink); color:#f6efe0; border-color:var(--ink)} .chip.active b{color:#d9b86a}
+
+  main{margin-top:24px}
+  section.page{display:none; animation:rise .5s ease both} section.page.show{display:block}
+  .panel{background:var(--card); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); padding:28px 28px 32px; position:relative; overflow:hidden}
+  .panel::after{content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:linear-gradient(180deg,var(--a),var(--gold),var(--b))}
+  .kicker{font-family:var(--hei); font-size:11.5px; letter-spacing:.22em; color:var(--ink-faint); text-transform:uppercase}
+  h1.section{font-family:var(--hei); font-weight:800; font-size:clamp(23px,4.4vw,32px); line-height:1.3; margin:.3em 0 .5em}
+  h2.sub{font-family:var(--hei); font-weight:700; font-size:17px; margin:1.5em 0 .5em}
+  p{margin:.6em 0} .lead{font-size:16.5px} .muted{color:var(--ink-soft)} .small{font-size:13px; color:var(--ink-faint)}
+  em{font-style:normal; background:linear-gradient(transparent 62%, rgba(140,112,56,.28) 0); padding:0 1px}
+  hr.rule{border:0; border-top:1px solid var(--line); margin:20px 0}
+  .num{font-variant-numeric:tabular-nums; font-weight:700}
+  .note{background:linear-gradient(0deg, rgba(140,43,34,.04), rgba(140,43,34,.04)), var(--card); border:1px solid var(--line-strong); border-left:4px solid var(--seal); border-radius:10px; padding:13px 15px; font-size:14px; color:var(--ink-soft); margin:14px 0}
+  .note b{color:var(--ink)}
+  .note.calm{border-left-color:var(--gold)}
+
+  /* 封面 */
+  .cover{padding:42px 28px 46px; text-align:center}
+  .cover .file-tab{display:inline-block; font-family:var(--hei); font-size:11.5px; letter-spacing:.28em; color:var(--ink-faint); border:1px solid var(--line-strong); border-radius:6px; padding:6px 13px; margin-bottom:22px}
+  .cover h1{font-family:var(--hei); font-weight:800; font-size:clamp(28px,6vw,48px); line-height:1.18; margin:.1em 0 .3em}
+  .cover h1 .x{color:var(--a)}
+  .cover .deck{font-size:clamp(14px,2.4vw,17px); color:var(--ink-soft); max-width:620px; margin:0 auto 6px}
+  .cover .meta{font-family:var(--hei); font-size:12.5px; color:var(--ink-faint); margin-top:14px; line-height:1.9}
+  .cover .chain{display:flex; justify-content:center; align-items:center; gap:8px; flex-wrap:wrap; margin:24px 0 6px; font-family:var(--hei); font-size:12.5px; color:#fff}
+  .cover .chain span{border-radius:999px; padding:7px 13px}
+  .c1{background:var(--broker)} .c2{background:var(--alert)} .c3{background:var(--court)}
+  .cover .chain i{color:var(--ink-faint); font-style:normal}
+  .start{margin-top:26px; font-family:var(--hei); font-weight:700; font-size:15.5px; color:#f6efe0; background:var(--ink); border:none; border-radius:999px; padding:13px 32px; cursor:pointer; letter-spacing:.05em; box-shadow:var(--shadow); transition:.2s}
+  .start:hover{transform:translateY(-2px)}
+  .disc-link{display:block; margin:14px auto 0; font-size:12.5px; color:var(--ink-faint); text-decoration:underline; cursor:pointer; background:none; border:none}
+
+  /* 时间线 */
+  .tline{position:relative; margin:6px 0 0; padding-left:26px}
+  .tline::before{content:""; position:absolute; left:7px; top:6px; bottom:6px; width:2px; background:var(--line-strong)}
+  .tnode{position:relative; padding:0 0 16px 16px}
+  .tnode::before{content:""; position:absolute; left:-23px; top:5px; width:12px; height:12px; border-radius:50%; background:var(--card); border:3px solid var(--info)}
+  .tnode.sell::before{border-color:var(--sell)} .tnode.buy::before{border-color:var(--buy)} .tnode.broker::before{border-color:var(--broker)} .tnode.court::before{border-color:var(--court)} .tnode.alert::before{border-color:var(--alert); background:var(--alert)}
+  .tnode .tt{font-family:var(--hei); font-weight:800; font-size:12.5px; color:var(--ink-faint); font-variant-numeric:tabular-nums}
+  .tnode .th{font-family:var(--hei); font-weight:700; font-size:14.5px; margin:1px 0 2px}
+  .tnode.alert .th{color:var(--alert)}
+  .tnode .td{font-size:13px; color:var(--ink-soft); display:none}
+  .tnode.open .td{display:block}
+  .tnode>.head{cursor:pointer}
+  .tlegend{display:flex; gap:14px; flex-wrap:wrap; font-family:var(--hei); font-size:11.5px; color:var(--ink-soft); margin:10px 0 16px}
+  .tlegend span{display:flex; align-items:center; gap:5px}
+  .dotk{width:10px; height:10px; border-radius:50%; display:inline-block}
+
+  /* 账本/计算 */
+  .toggle{display:inline-flex; background:var(--paper); border:1px solid var(--line-strong); border-radius:999px; padding:4px; margin:6px 0 14px; gap:4px}
+  .toggle button{font-family:var(--hei); font-weight:700; font-size:13.5px; border:none; background:transparent; color:var(--ink-soft); padding:8px 16px; border-radius:999px; cursor:pointer; transition:.2s}
+  .toggle button.on{color:#fff} .toggle button.on.settle{background:var(--b)} .toggle button.on.advance{background:var(--a)}
+  .ledger{border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--card); margin-bottom:14px}
+  .ledger .lhead{font-family:var(--hei); font-weight:800; font-size:14.5px; padding:13px 16px; color:#fff; display:flex; justify-content:space-between; align-items:center}
+  .ledger .lhead.settle{background:var(--b)} .ledger .lhead.advance{background:var(--a)}
+  .ledger .lhead .badge{font-size:11px; font-weight:700; background:rgba(255,255,255,.22); padding:3px 9px; border-radius:6px}
+  .row{display:flex; justify-content:space-between; gap:12px; padding:10px 16px; border-top:1px solid var(--line); font-size:14px}
+  .row:first-of-type{border-top:none} .row .lbl{color:var(--ink-soft)} .row .val{font-variant-numeric:tabular-nums; font-weight:700; white-space:nowrap}
+  .row.total{background:var(--paper)} .row.total .lbl{color:var(--ink); font-family:var(--hei); font-weight:700} .row.total .val{font-size:15px}
+  .val.pos{color:#2e6b3e} .val.neg{color:#9a3b2c} .val.zero{color:var(--ink-faint)}
+  .ledger .lfoot{padding:12px 16px; border-top:1px solid var(--line); font-size:13px; color:var(--ink-soft); background:var(--paper)}
+  .cards{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:6px}
+  .mini{border:1px solid var(--line); border-radius:11px; padding:13px 15px; background:var(--card)}
+  .mini .mt{font-family:var(--hei); font-weight:700; font-size:12.5px; color:var(--gold); letter-spacing:.04em}
+  .mini .mb{font-size:13.5px; color:var(--ink-soft); margin-top:4px}
+  .mini .mbig{font-family:var(--hei); font-weight:800; font-size:20px; font-variant-numeric:tabular-nums; margin-top:4px}
+
+  /* 通用表 */
+  table.t{width:100%; border-collapse:collapse; font-size:13px; margin:6px 0}
+  table.t th, table.t td{border:1px solid var(--line); padding:8px 10px; text-align:right; font-variant-numeric:tabular-nums}
+  table.t th{background:var(--ink); color:#f6efe0; font-family:var(--hei); font-weight:700; text-align:center}
+  table.t td.l{text-align:left; font-variant-numeric:normal}
+  table.t tr:nth-child(even) td{background:var(--paper)}
+  table.t tr.sum td{background:#efe6cf; font-weight:800}
+  .scroll{overflow-x:auto}
+
+  /* 证据卡 */
+  .pcard{border:1px solid var(--line); border-radius:12px; overflow:hidden; margin-bottom:12px; background:var(--card)}
+  .pcard .ph{background:var(--alert); color:#fff; padding:11px 15px; font-family:var(--hei); display:flex; justify-content:space-between; align-items:center; gap:8px}
+  .pcard .ph .pn{font-weight:800; font-size:15px}
+  .pcard .ph .ptag{font-size:10.5px; background:rgba(255,255,255,.22); padding:3px 8px; border-radius:5px; white-space:nowrap}
+  .pcard .pb{padding:13px 15px; font-size:13.5px; color:var(--ink-soft)}
+
+  /* FIX */
+  .fixrow{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:9px 14px; border:1px solid var(--line); border-radius:9px; margin-bottom:7px; background:var(--card); font-size:13.5px}
+  .fixrow.warn{border-color:var(--alert); background:linear-gradient(0deg,rgba(140,43,34,.05),rgba(140,43,34,.05)),var(--card)}
+  .fixrow .ftag{font-family:var(--hei); font-weight:700; color:var(--ink)}
+  .fixrow .fv{font-variant-numeric:tabular-nums; font-weight:800; color:var(--b)}
+  .fixrow.warn .fv{color:var(--alert)}
+  .fixrow .fn{color:var(--ink-faint); font-size:12px}
+
+  /* 录音卡 */
+  .qcard{border-left:4px solid var(--b); background:var(--card); border:1px solid var(--line); border-left-width:4px; border-radius:10px; padding:13px 15px; margin-bottom:11px}
+  .qcard .qw{font-family:var(--hei); font-weight:700; font-size:12.5px; color:var(--b); margin-bottom:5px}
+  .qcard .qq{font-size:14.5px; color:var(--ink); font-style:italic; quotes:"「" "」"}
+  .qcard .qq::before{content:open-quote} .qcard .qq::after{content:close-quote}
+  .qcard .qi{font-size:13px; color:var(--ink-soft); margin-top:7px; padding-top:7px; border-top:1px dashed var(--line)}
+  .qcard.keep{border-left-color:var(--alert)} .qcard.keep .qw{color:var(--alert)}
+
+  /* 两栏/法律 */
+  .twocol{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:6px}
+  .lc{border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--card)}
+  .lc .lch{padding:13px 15px; color:#fff; font-family:var(--hei)}
+  .lc.adv .lch{background:var(--a)} .lc.set .lch{background:var(--b)}
+  .lc .lch .lct{font-weight:800; font-size:15px} .lc .lch .lcs{font-size:11.5px; opacity:.9}
+  .lc .lcb{padding:12px 15px} .lc .lcb li{font-size:13px; color:var(--ink-soft); margin:.35em 0}
+  .chainbox{display:flex; gap:8px; align-items:stretch; flex-wrap:wrap; margin:8px 0}
+  .chainbox .cstep{flex:1 1 200px; border:1px solid var(--line); border-radius:11px; padding:13px 15px; background:var(--card)}
+  .chainbox .cstep .cs1{font-family:var(--hei); font-weight:800; font-size:14px}
+  .chainbox .cstep.s1{border-top:4px solid var(--broker)} .chainbox .cstep.s2{border-top:4px solid var(--alert)} .chainbox .cstep.s3{border-top:4px solid var(--court)}
+  .chainbox .cstep .cs2{font-size:12.5px; color:var(--ink-soft); margin-top:4px}
+  .stat{list-style:none; padding:0; margin:6px 0} .stat li{font-size:13.5px; padding:7px 0; border-top:1px dashed var(--line)} .stat li:first-child{border-top:none}
+  .tag-law{display:inline-block; font-family:var(--hei); font-size:11px; background:var(--ink); color:#f6efe0; border-radius:5px; padding:2px 7px; margin:2px 4px 2px 0}
+
+  /* 对抗演练 */
+  .train-intro{background:linear-gradient(0deg,rgba(58,100,112,.06),rgba(58,100,112,.06)),var(--card); border:1px solid var(--line-strong); border-left:4px solid var(--b); border-radius:10px; padding:13px 15px; font-size:13.5px; color:var(--ink-soft); margin-bottom:16px}
+  .seg{display:flex; gap:6px; flex-wrap:wrap; margin:6px 0 14px}
+  .seg button{font-family:var(--hei); font-weight:700; font-size:12.5px; border:1px solid var(--line-strong); background:var(--card); color:var(--ink-soft); border-radius:999px; padding:7px 13px; cursor:pointer; transition:.18s}
+  .seg button.on{background:var(--ink); color:#f6efe0; border-color:var(--ink)}
+  .seg-pane{display:none} .seg-pane.show{display:block; animation:rise .35s ease both}
+  .arg{border-left:3px solid var(--a); padding:9px 13px; background:var(--card); border:1px solid var(--line); border-left-width:3px; border-radius:9px; margin-bottom:9px; font-size:13.5px; color:var(--ink-soft)}
+  .arg.fi{border-left-color:var(--court)}
+  .weak{border-left:3px solid var(--seal); padding:9px 13px; background:linear-gradient(0deg,rgba(140,43,34,.04),rgba(140,43,34,.04)),var(--card); border:1px solid var(--line); border-left-width:3px; border-radius:9px; margin-bottom:9px; font-size:13.5px; color:var(--ink-soft)}
+  .weak b{color:var(--alert)}
+  .flip{border:1px solid var(--line); border-radius:11px; overflow:hidden; margin-bottom:10px; background:var(--card)}
+  .flip>button{width:100%; text-align:left; border:none; background:var(--paper); padding:12px 15px; cursor:pointer; font-family:var(--hei); font-weight:700; font-size:13.5px; color:var(--ink); display:flex; justify-content:space-between; gap:10px; align-items:center}
+  .flip>button .qf{color:var(--court)}
+  .flip>button .pm{color:var(--ink-faint); font-weight:800}
+  .flip .ans{max-height:0; overflow:hidden; transition:max-height .3s ease; padding:0 15px; font-size:13.5px; color:var(--ink-soft)}
+  .flip.open .ans{max-height:360px; padding:11px 15px 13px}
+  .q3{list-style:none; counter-reset:q; padding:0; margin:6px 0}
+  .q3 li{position:relative; padding:11px 0 11px 38px; border-top:1px dashed var(--line); font-size:14px}
+  .q3 li:first-child{border-top:none}
+  .q3 li::before{counter-increment:q; content:counter(q); position:absolute; left:0; top:10px; width:24px; height:24px; border-radius:50%; background:var(--seal); color:#fff; font-family:var(--hei); font-weight:800; font-size:13px; text-align:center; line-height:24px}
+
+  footer.nav{position:fixed; left:0; right:0; bottom:0; z-index:30; background:linear-gradient(0deg, rgba(243,236,221,.98), rgba(243,236,221,.86)); backdrop-filter:blur(6px); border-top:1px solid var(--line); padding:11px 16px env(safe-area-inset-bottom)}
+  .nav-row{max-width:960px; margin:0 auto; display:flex; align-items:center; gap:12px}
+  .nav-row .pos{flex:1; text-align:center; font-family:var(--hei); font-size:12px; color:var(--ink-faint); font-variant-numeric:tabular-nums}
+  .btn{font-family:var(--hei); font-weight:700; font-size:14px; border-radius:999px; padding:10px 20px; cursor:pointer; transition:.2s; border:1px solid var(--line-strong); background:var(--card); color:var(--ink-soft)}
+  .btn:hover:not(:disabled){border-color:var(--ink-soft); color:var(--ink)} .btn:disabled{opacity:.4; cursor:default}
+  .btn.primary{background:var(--ink); color:#f6efe0; border-color:var(--ink)} .btn.primary:hover:not(:disabled){transform:translateY(-2px)}
+
+  .overlay{position:fixed; inset:0; z-index:50; background:rgba(20,15,8,.5); display:none; align-items:center; justify-content:center; padding:20px}
+  .overlay.show{display:flex; animation:rise .3s ease both}
+  .modal{background:var(--card); border-radius:16px; max-width:560px; width:100%; padding:24px; box-shadow:var(--shadow); border:1px solid var(--line)}
+  .modal h3{font-family:var(--hei); margin:0 0 10px; font-size:18px} .modal p{font-size:13.5px; margin:.5em 0; color:var(--ink-soft)}
+  .modal .x{float:right; cursor:pointer; border:none; background:none; font-size:20px; color:var(--ink-faint)}
+
+  @keyframes drop{from{opacity:0; transform:translateY(-10px)} to{opacity:1; transform:none}}
+  @keyframes rise{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none}}
+  @media (max-width:640px){ .panel{padding:20px 16px 24px} .twocol,.cards{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="top-row">
+      <div class="brand">双十订单纠纷<span class="dot">·</span>数据指纹学习训练台</div>
+      <div class="verify" id="vbadge">✓ 26项 Decimal 核验通过</div>
+      <div class="top-spacer"></div>
+      <button class="ghost" data-action="disc-open">说明</button>
+    </div>
+    <div class="prog"><i id="bar"></i></div>
+    <nav class="steps" id="chips"></nav>
+  </header>
+
+  <main id="main">
+
+    <!-- 0 封面 -->
+    <section class="page show">
+      <div class="panel cover">
+        <span class="file-tab">自用 · 学习训练 · 攻防演练</span>
+        <h1>钱少 31.6 万 · 股多 2 万股<br><span class="x">两条线，指向同一笔回购</span></h1>
+        <p class="deck">把四份材料的全部数据拆到逐笔、逐字。既练你方的论证，也练对方与一审的逻辑——训练，要敢于直面攻防两端。</p>
+        <div class="chain">
+          <span class="c1">9:20:39 高价抬拉自家股价</span><i>→</i><span class="c2">9:31 盗资冲正</span><i>→</i><span class="c3">虚假诉讼</span>
+        </div>
+        <div class="meta">一审 (2025)粤0105民初3632号 · 二审 (2026)粤01民终16331号<br>上诉人 陈善　被上诉人 国泰海通证券股份有限公司（及广州东风中路营业部）</div>
+        <button class="start" data-action="go" data-i="1">进入训练台 →</button>
+        <button class="disc-link" data-action="disc-open">使用说明</button>
+      </div>
+    </section>
+
+    <!-- 1 时间线 -->
+    <section class="page"><div class="panel">
+      <div class="kicker">Module 01 · 时间线</div>
+      <h1 class="section">2024/10/10 起 · 完整时序</h1>
+      <p class="muted">点击任一节点展开细节。颜色区分动作主体。</p>
+      <div class="tlegend">
+        <span><i class="dotk" style="background:var(--sell)"></i>卖出</span>
+        <span><i class="dotk" style="background:var(--buy)"></i>买入</span>
+        <span><i class="dotk" style="background:var(--broker)"></i>券商处置</span>
+        <span><i class="dotk" style="background:var(--alert)"></i>推断作案点</span>
+        <span><i class="dotk" style="background:var(--court)"></i>调解/诉讼</span>
+        <span><i class="dotk" style="background:var(--info)"></i>账户/事实</span>
+      </div>
+      <div class="tline" id="tline"></div>
+    </div></section>
+
+    <!-- 2 资金等式 -->
+    <section class="page"><div class="panel">
+      <div class="kicker">Module 02 · 资金等式（已核验）</div>
+      <h1 class="section">钱去哪了 — 只用原告自认数反推</h1>
+      <p class="lead">全程不依赖上诉人单方数据；汇率为各方无异议之公理（卖出结算 <span class="num">0.90994</span>、买入结算 <span class="num">0.91026</span>）。</p>
+      <div class="toggle">
+        <button id="tg-settle" class="on settle" data-action="model" data-model="settle">结算视角</button>
+        <button id="tg-advance" class="advance" data-action="model" data-model="advance">垫付视角</button>
+      </div>
+      <div id="ledgerBox"></div>
+      <div class="cards">
+        <div class="mini"><div class="mt">缺口费率拆分</div><div class="mb">股票成本 ¥315,600.44 ＋ 佣金 ¥252.48 ＋ 其他费用 ¥357.14</div><div class="mbig">¥316,210.06</div></div>
+        <div class="mini"><div class="mt">回购单价（推导）</div><div class="mb">315,600.44 ÷ 20,000 ÷ 0.91026，落于 16.3–18 港元区间</div><div class="mbig">HK$17.336</div></div>
+        <div class="mini"><div class="mt">双口径汇差</div><div class="mb">参考0.8828(盘中) 对 结算0.90994(T+2)：6,000,000×差</div><div class="mbig">¥162,840.00</div></div>
+        <div class="mini"><div class="mt">物理终态 ¥415.05</div><div class="mb">真实人民币99.13 ＋ 港币残值357.86港元(折315.92)，分毫闭合</div><div class="mbig">99.13＋315.92</div></div>
+      </div>
+      <div class="note"><b>一句话：</b>本属客户的可用资金 ¥5,449,654.17 ＝ 明处七笔买入 ¥5,133,444.11 ＋ 暗处缺口 ¥316,210.06。缺口可由原告确认数算出，唯独其去向，原告始终回避。</div>
+    </div></section>
+
+    <!-- 3 七笔买入 -->
+    <section class="page"><div class="panel">
+      <div class="kicker">Module 03 · 七笔买入交割单</div>
+      <h1 class="section">逐笔余额链 · 闭合到 −5,133,345.47</h1>
+      <p class="muted">从 T+2 交割前余额 ¥98.64 起，逐笔累加；末笔剩余与第7张交割单分毫吻合（已核验）。</p>
+      <div class="scroll"><table class="t" id="buys"></table></div>
+      <div class="note">若真为“垫付购股款”，金额应仅为七笔买入合计 <b>¥5,133,444.11</b>（固定、单独、不与账户余额勾兑）。但起诉额为 <b>¥5,133,345.56</b> ＝ 5,133,444.11 − 98.64 ＋ 凭空 0.09——已深度混入账户余额与组合费，是“结算”形态，不是“垫付”。</div>
+    </div></section>
+
+    <!-- 4 数据指纹 -->
+    <section class="page"><div class="panel">
+      <div class="kicker">Module 04 · 数据指纹（三处铁证）</div>
+      <h1 class="section">“伪造在哪” — 直接指出</h1>
+      <p class="muted">一审判词称“被告证明不了原告数据伪造在哪”。以下逐处指出。</p>
+      <div id="proofs"></div>
+      <h2 class="sub">三个“513万”同源归一</h2>
+      <p class="small">三处看似同一，实各有出处，均＝真实七笔买单 ¥5,133,444.11 − 对应时点账户余额。环环咬合，证明数据被围绕“垫付额”反复编排。</p>
+      <div class="scroll"><table class="t" id="three"></table></div>
+    </div></section>
+
+    <!-- 5 FIX -->
+    <section class="page"><div class="panel">
+      <div class="kicker">Module 05 · FIX 报文（第7号证据）</div>
+      <h1 class="section">“成交后撤销”，而非“从未成交”</h1>
+      <p class="muted">红框为内部矛盾/锁定对手方的关键字段。</p>
+      <div id="fix"></div>
+      <div class="note"><b>核心矛盾：</b>既标已撤单（150/39=4），同一报文却载成交价 300、成交量 20,000、CumQty=20,000、剩余 0——若从未成交，此三项应为 0/空。其非零值反证此前必有一份<b>成交执行报告</b>。Tag 453=2 ＋ 单元号 53559，锁定<b>有对手方</b>，与“无对手方”主张直接矛盾。</div>
+      <div class="note"><b>证据互殴：</b>第5号证据显示成交 20,000股 / 600万港元；第9号证据显示成交 0股 / 0元。同一原告、同一订单，<b>必有一份为伪</b>。第9号又带结算代码 <b>Js509</b>——有成交才有结算码。</div>
+    </div></section>
+
+    <!-- 6 录音口供 -->
+    <section class="page"><div class="panel">
+      <div class="kicker">Module 06 · 录音口供</div>
+      <h1 class="section">孙嵘 / 蓝公懋 · 关键陈述</h1>
+      <p class="muted">系和解商谈及通话原话；券商质证意见已承认其真实性。每条附数据层面的对应。</p>
+      <div id="quotes"></div>
+    </div></section>
+
+    <!-- 7 法律定性 -->
+    <section class="page"><div class="panel">
+      <div class="kicker">Module 07 · 法律定性</div>
+      <h1 class="section">三段违法链 · 与法律适用</h1>
+      <div class="chainbox">
+        <div class="cstep s1"><div class="cs1">① 9:20:39 高价抬拉自家股价</div><div class="cs2">自营盘在集合竞价高位接下卖单、大陆系统内场外撮合。违反《证券法》55条(禁操纵)、39条(场内交易)、136条(诚信)及经纪自营隔离。</div></div>
+        <div class="cstep s2"><div class="cs1">② 9:31 盗资冲正</div><div class="cs2">盗用账户资金于二级市场回购20,000股@17.336，抵消卖出记录、伪造“从未成交”外观，遗留 ¥316,210.06 缺口。</div></div>
+        <div class="cstep s3"><div class="cs1">③ 虚假诉讼</div><div class="cs2">以“故障·未成交”虚假陈述，将结算捏造为“垫付”，借司法转嫁亏损。</div></div>
+      </div>
+
+      <h2 class="sub">“垫付” 与 “结算” 的本质区别</h2>
+      <div class="twocol">
+        <div class="lc adv"><div class="lch"><div class="lct">垫付（六特征）</div><div class="lcs">账上一笔固定独立的“债”</div></div><div class="lcb"><ul>
+          <li>须有付款凭证</li><li>与账户余额、组合费、汇率换算无关</li><li>金额唯一、可单独拎出（＝代付本金）</li><li>不经净额结算、不与账户资金勾兑</li><li>有合同义务</li><li>客户有欠款</li></ul></div></div>
+        <div class="lc set"><div class="lch"><div class="lct">结算（四特征）</div><div class="lcs">一系列净差资金流水</div></div><div class="lcb"><ul>
+          <li>金额牵扯账户余额、组合费、参考/结算双汇率</li><li>账上呈现与账户余额的抵扣轧差</li><li>成交后券商主动扣款改数、处处包抄</li><li>买卖双向数据齐全匹配对账</li></ul></div></div>
+      </div>
+      <p class="small">本案全流程表现“结算”特征，且交割后账户复正 ¥4,780,986.80，根本不存在需“垫付”的基础。</p>
+
+      <h2 class="sub">法律适用要点</h2>
+      <ul class="stat">
+        <li><b>交收终局不可撤销：</b>《证券登记结算管理办法》48条(货银对付)、52条(交收完成不可撤销)；《证券法》117条。券商弃“订单回滚/暂缓交收/强制平仓”三道防线不用。</li>
+        <li><b>举证责任倒置：</b>《证券法》89条 ＋ 《关于民事诉讼证据的若干规定》95条(举证妨碍)。服务器日志、中登划转、完整FIX由券商独家掌握，拒不提供即作不利认定。</li>
+        <li><b>特别法优先：</b>《立法法》103条。一审改案由为证券纠纷却用《民法典》157/179条裁判，体系错配；157条规范“已成立但无效”，与一审“从未成立”自相矛盾。</li>
+      </ul>
+      <h2 class="sub">所涉刑事线索（上诉人主张）</h2>
+      <div>
+        <span class="tag-law">刑法182 操纵证券市场</span><span class="tag-law">刑法185(之一) 挪用资金·背信运用受托财产</span><span class="tag-law">刑法162之一 隐匿/销毁会计凭证</span><span class="tag-law">刑法181 编造并传播虚假信息</span><span class="tag-law">刑法307之一 虚假诉讼（众罪之首）</span><span class="tag-law">刑法307 妨害作证</span>
+      </div>
+      <p class="small" style="margin-top:8px">移送依据：《最高人民法院关于在审理经济纠纷案件中涉及经济犯罪嫌疑若干问题的规定》第11条；立案标准低于定罪标准（刑诉法112条）。</p>
+    </div></section>
+
+    <!-- 8 程序正义 -->
+    <section class="page"><div class="panel">
+      <div class="kicker">Module 08 · 程序正义（你方主张）</div>
+      <h1 class="section">程序正义 — 逐条 · 全细节</h1>
+      <p class="lead">程序正义是司法根基。本模块站在你方立场，把“一审审理程序违法 ＋ 券商处置程序违法 ＋ 应先刑后民移送”逐条铺到细节，每条均附所违法条。</p>
+      <div class="note"><b>总纲：</b>一审判决在六个方面严重违背《民事诉讼法》第177条，符合发回重审或依法改判的法定条件。客户质疑券商虚假诉讼，法院应<b>优先排除</b>。</div>
+
+      <h2 class="sub">一、一审审理程序 · 六处违法</h2>
+      <div id="procTrial"></div>
+
+      <h2 class="sub">二、券商处置程序根本违法</h2>
+      <div id="procBroker"></div>
+
+      <h2 class="sub">三、应“先刑后民” · 裁定驳回起诉并移送侦查</h2>
+      <div id="procCrim"></div>
+      <div class="note calm">立案标准远低于定罪标准（《刑事诉讼法》第112条）：你只需证明存在需刑事侦查机关审查的犯罪线索，即完成举证。</div>
+    </div></section>
+
+    <!-- 9 对抗演练 -->
+    <section class="page"><div class="panel">
+      <div class="kicker">Module 09 · 对抗演练（训练核心）</div>
+      <h1 class="section">攻防两端 · 把对方的牌也摆上桌</h1>
+      <div class="train-intro"><b>训练逻辑：</b>能驳倒的前提，是先把对方与一审的逻辑摆正、摆强。本模块如实陈列对方主张、一审理由、<b>你方薄弱点</b>，再到反制问答与当庭三问。薄弱点不是泄气，是你二审最需要提前补强的地方。</div>
+      <div class="seg">
+        <button class="on" data-action="seg" data-seg="opp">对方/一审会怎么说</button>
+        <button data-action="seg" data-seg="weak">你方薄弱点</button>
+        <button data-action="seg" data-seg="rebut">反制问答</button>
+        <button data-action="seg" data-seg="q3">当庭三问</button>
+      </div>
+      <div class="seg-pane show" id="pane-opp"></div>
+      <div class="seg-pane" id="pane-weak"></div>
+      <div class="seg-pane" id="pane-rebut"></div>
+      <div class="seg-pane" id="pane-q3"></div>
+    </div></section>
+
+    <!-- 10 说明 -->
+    <section class="page"><div class="panel">
+      <div class="kicker">Module 10 · 说明</div>
+      <h1 class="section">关于这个训练台</h1>
+      <ul style="font-size:14.5px; line-height:2; padding-left:1.1em">
+        <li>供<b>个人学习与庭审训练</b>之用，非法律意见。</li>
+        <li>数据取自四份材料（上诉状、附件1数据指纹、附件2图解、附件3三处铁证），全部核心数字已用 Python <b>Decimal</b> 逐笔核验（26项 ＋ 七笔余额链，全通过）。</li>
+        <li>“盗资回购 9:31 / 17.336港元”等为上诉人据自认数反推的<b>论证与推断</b>；其成立有赖法院调取后台数据。对抗演练模块已如实标出此类<b>薄弱点</b>。</li>
+        <li>是非曲直由法院依证据与法律裁断；本训练台不作裁断。</li>
+      </ul>
+      <div class="note calm">数学检验是最公正的手段，在数学面前人人平等。摆事实，讲逻辑，攻防皆备。</div>
+      <div style="text-align:center; margin-top:22px"><button class="start" data-action="go" data-i="0">↺ 回到封面</button></div>
+    </div></section>
+
+  </main>
+</div>
+
+<footer class="nav"><div class="nav-row">
+  <button class="btn" id="prev" data-action="prev">← 上一页</button>
+  <div class="pos" id="posLabel"></div>
+  <button class="btn primary" id="next" data-action="next">下一页 →</button>
+</div></footer>
+
+<div class="overlay" id="disc">
+  <div class="modal">
+    <button class="x" data-action="disc-close">×</button>
+    <h3>使用说明</h3>
+    <p>本训练台供<b>个人学习与庭审训练</b>之用，非法律意见。数据取自四份材料，核心数字已用 Decimal 逐笔核验（26项＋七笔余额链全通过）。</p>
+    <p>其中“9:31 盗资回购、17.336港元”等系据原告自认数<b>反推的论证</b>，成立有赖法院调取后台数据；“对抗演练”模块已如实列出此类薄弱点，以便二审提前补强。</p>
+    <p>是非曲直应由法院依证据与法律裁断；本训练台不作裁断。</p>
+    <div style="text-align:right; margin-top:8px"><button class="btn primary" data-action="disc-close">知道了</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var LABELS=["封面","时间线","资金等式","七笔买入","数据指纹","FIX报文","录音口供","法律定性","程序正义","对抗演练","说明"];
+  var pages=document.querySelectorAll("section.page"); var idx=0;
+
+  var TIMELINE=[
+   {t:"停牌前",k:"info",h:"H股停牌前收市 8.07 港元",d:"国泰君安H股(02611)停牌前最后收市价。"},
+   {t:"复牌·集合竞价",k:"info",h:"复牌首日不设涨跌幅，报价一度高达 4,000 港元",d:"依香港规则第501G(3A)条，新上市/复牌首日豁免价格限制；集合竞价时段出现异常高报价。"},
+   {t:"09:06:52",k:"sell",h:"委托卖出 20,000 股 @ 300 港元",d:"订单号 260018618，成交总额 600万港元；经券商沪港通平台申报。"},
+   {t:"09:20:39",k:"sell",h:"FIX 记成交时点（场外撮合·股票交付）",d:"FIX报文 Tag 60=20241010-09:20:39。上诉人主张：卖单与原告自营盘在大陆系统内场外撮合、股票即时交付。"},
+   {t:"09:24",k:"sell",h:"原持 20,000 股卖出归零（图5）",d:"账户原持国泰君安20,000股已卖出清零，数据分界泾渭分明。"},
+   {t:"约 09:30",k:"info",h:"图6 资金资产 ¥5,286,814.66（参考汇率0.8828）",d:"股票市值182,889.20、当日盈利5,298,903.61；到账5,286,715.53 ＋ 现金99.13 ＝ 5,286,814.66，精确闭合。"},
+   {t:"09:31（推断）",k:"alert",h:"盗资回购 20,000 股 @ 17.336 港元",d:"上诉人推断：原告盗用账户资金于港交所二级市场回购，窗口落于9:30开盘后、9:35买入新股前。属强推断（详见对抗演练）。"},
+   {t:"09:35–09:38",k:"buy",h:"买入新股，账户仅余 ¥415.05",d:"共买入92,800股国泰君安等7笔。415.05 ＝ 真实人民币99.13 ＋ 港币残值357.86港元(折315.92)。"},
+   {t:"12:17",k:"broker",h:"首次扣款 ¥5,999,900.87（按港元面值）",d:"图11：6,000,000−99.13，未作汇率换算，按港元面值直接当人民币扣减。质证意见第10条自认“应急措施、未换算”。"},
+   {t:"当日下午",k:"broker",h:"多人上门住所",d:"上诉人称感觉威胁而回避。"},
+   {t:"次日 02:28",k:"broker",h:"改扣款为 ¥5,133,345.06（图17）",d:"隔夜变动 ¥866,555.81；账户资产 ¥33,178.14。"},
+   {t:"次日 02:34",k:"broker",h:"删除当月成交记录",d:"上诉人主张属隐匿/销毁会计凭证。"},
+   {t:"10/14 商谈",k:"broker",h:"提议18港元回购、补浮亏60余万、约80万元、签保密协议",d:"孙嵘称获总部授权。"},
+   {t:"10/15 15:27",k:"broker",h:"账户 −¥406,334.40（负资产“爆仓”）",d:"图24；非融资账户本不应出现负资产，系非法扣款所致。"},
+   {t:"10/15 夜",k:"info",h:"交割资金如期入账",d:"中国结算 T+2 交收。"},
+   {t:"10/16 06:57",k:"info",h:"账户复正 ¥4,780,986.80（图25）",d:"隔夜复正，自证交割系中国结算系统自动终局。"},
+   {t:"2024/11/26",k:"court",h:"广东证监局调解未果",d:"券商未提交FIX报文；后案件转上海证监局。"},
+   {t:"2025/02/14",k:"court",h:"券商起诉 ＋ 司法冻结，追 ¥5,133,345.56",d:"以“不当得利”为由；冻结交易/银行账户及股票登记。"},
+   {t:"2025/05/26",k:"court",h:"一审庭审",d:"质证后上诉人请求5分钟以数学方法陈述，被审判长打断。"},
+   {t:"2025/06/04",k:"court",h:"券商补充质证意见",d:"对第9号证据六点质疑未回应。"},
+   {t:"一审判决",k:"court",h:"海珠区法院判返还 ¥5,133,345.56",d:"(2025)粤0105民初3632号；改案由为证券纠纷，却适用《民法典》157条。"},
+   {t:"二审",k:"court",h:"广州中院 (2026)粤01民终16331号",d:"上诉人请求：撤销改判、依职权调取服务器日志/完整FIX/中登划转、移送侦查。"}
+  ];
+
+  var LEDGERS={
+    settle:{cls:"settle",title:"结算视角 · 资金守恒反推",badge:"净差流水",rows:[
+      {l:"卖出毛款 HK$6,000,000 × 0.90994",v:"¥5,459,640.00",c:"pos"},
+      {l:"减 原告自认费用及佣金",v:"− ¥10,084.47",c:"neg"},
+      {l:"＝ 净回款（T+2实际入账）",v:"¥5,449,555.53",c:"pos"},
+      {l:"加 T+2 交割前余额",v:"+ ¥98.64",c:"pos"},
+      {l:"＝ 可用资金",v:"¥5,449,654.17",c:"pos"},
+      {l:"减 七笔真实买入合计",v:"− ¥5,133,444.11",c:"neg"},
+      {l:"＝ 应余 / 实际被盗资金缺口",v:"¥316,210.06",c:"neg",total:true}
+    ],foot:"九点后买入新股，9:38账户却只剩 ¥415.05——本应留存的 ¥316,210.06 已于 9:31 不见。"},
+    advance:{cls:"advance",title:"垫付视角 · 若如券商所称",badge:"固定独立的债",rows:[
+      {l:"卖出（券商称未成交/虚增）",v:"不计入",c:"zero"},
+      {l:"七笔买入仍发生，账户无款",v:"− ¥5,133,444.11",c:"neg"},
+      {l:"交割前余额",v:"¥98.64",c:"zero"},
+      {l:"则“垫付”应＝七笔买入合计",v:"¥5,133,444.11",c:"neg",total:true}
+    ],foot:"垫付应是一笔固定、可单独拎出、不与账户余额勾兑的债（¥5,133,444.11）。但起诉额却是 ¥5,133,345.56＝5,133,444.11−98.64＋凭空0.09，深度混入账户余额与组合费——这是“结算”，不是“垫付”。"}
+  };
+
+  var BUYS=[
+   ["1","国泰君安 02611","92,800","14.999","−1,269,444.44","−1,269,345.80"],
+   ["2","中信证券 06030","48,000","21.800","−954,313.06","−2,223,658.86"],
+   ["3","中信证券 06030","72,500","21.884","−1,446,956.30","−3,670,615.16"],
+   ["4","中信证券 06030","36,500","21.697","−722,261.22","−4,392,876.38"],
+   ["5","玖龙纸业 02689","115,000","3.510","−368,136.17","−4,761,012.55"],
+   ["6","东阳光药 01558","22,400","9.070","−185,337.50","−4,946,350.05"],
+   ["7","东阳光药 01558","22,600","9.070","−186,995.42","−5,133,345.47"]
+  ];
+
+  var PROOFS=[
+   {n:"铁证一",tag:"附件3·铁证一",t:"凭空的 0.09 元组合费",b:"交割单末笔实为 −¥5,133,345.47；起诉主张 ¥5,133,345.56，恰多 0.09。真实港股组合费为 ¥0.49（0.02+0.06+0.08+0.33，账单实有），账户查无 0.09 这一笔。将与交割无关之费计入“垫付”抬高诉请——画蛇添足。"},
+   {n:"铁证二",tag:"附件3·铁证二",t:"两次扣款两次出错，人手痕迹昭然",b:"10/10 12:17 首扣 ¥5,999,900.87（＝6,000,000−99.13，按港元面值当人民币、未换汇）；次日02:28 改为 ¥5,133,345.06（隔夜变动 ¥866,555.81）。同一账户余额先后用 99.13 / 99.05 / 98.64 三个数。错的不是“系统”，是急于扣款灭迹的人手。"},
+   {n:"铁证三",tag:"附件3·铁证三",t:"第9号证据六处破绽，券商始终不答",b:"①“0当日有效”表示委托有效；②上交所留有该订单记录；③带结算代码 Js509（有成交才有结算码）；④申报时间码错乱＝删改痕迹；⑤以开市后数据冒充开市前集合竞价订单（关公战秦琼）；⑥全程无撤单时间＝无撤单。庭审与补充意见均未回应→《证据规定》第8条第2款视为承认。"}
+  ];
+  var THREE=[
+   ["①","图17扣款数","5,133,444.11 − 99.05","5,133,345.06"],
+   ["②","交割单末笔剩余","5,133,444.11 − 98.64","5,133,345.47"],
+   ["③","起诉主张数","5,133,444.11 − 98.64 ＋ 0.09(查无此笔)","5,133,345.56"]
+  ];
+
+  var FIX=[
+   {tag:"Tag 31 LastPx",v:"300.000",n:"成交价 300 港元"},
+   {tag:"Tag 32 LastQty",v:"20000",n:"成交数量 2万股"},
+   {tag:"CumQty",v:"20000",n:"累计成交量"},
+   {tag:"Tag 151 LeavesQty",v:"0",n:"剩余量为 0"},
+   {tag:"Tag 39 OrdStatus",v:"4",n:"已撤单",warn:true},
+   {tag:"Tag 150 ExecType",v:"4 Canceled",n:"执行类型＝撤单",warn:true},
+   {tag:"Tag 453 NoPartyIDs",v:"2",n:"两个交易参与方",warn:true},
+   {tag:"Tag 448",v:"A473938713",n:"投资者账户"},
+   {tag:"Tag 448",v:"53559",n:"对手方单元号（券商席位）",warn:true},
+   {tag:"Tag 60 TransactTime",v:"20241010-09:20:39",n:"成交/交付时点"}
+  ];
+
+  var QUOTES=[
+   {who:"孙嵘（第2次商谈）",q:"港交所？我们可以在中登上找到，但是港交所没有这笔交易。",i:"两个本应同步的系统却不同步——唯一自洽解释：未经港交所撮合，券商在自家系统内部撮出、以自营盘接单，再在中登端留交收痕迹（高价抬拉自家股价）。"},
+   {who:"孙嵘（第1次商谈）",q:"我知道。我们扣出来是为了防止您进一步的动作。",i:"主语“我们扣”＝人手主动；“防止您进一步动作”＝主观意图。与“系统自动纠错”截然相反，印证按港元面值的粗糙扣款。"},
+   {who:"孙嵘（第2次商谈）",q:"以18块当天的最高价给您做成交……半个月内会给您恢复到正常的情况。",i:"卖出 → 低价买回 → 恢复账户，正是 9:31 暗中所做的盗资冲正机制本身。一个当面提，一个偷着做。"},
+   {who:"孙嵘（第3次商谈）",keep:true,q:"账户原来32万、现在变成-40万 —— “对对对”（连续3次），再答“对对”（连续2次）。",i:"对账户从 +32万 到 −40万 当面附和（“对对对/对对”已与原始音频核对属实，不得改为单字“对”）。与数据反推缺口 ¥316,210.06 分毫相近，构成口供自认。"},
+   {who:"孙嵘（10/14 通话）",q:"愿补浮亏60余万、以18港元回购20,000股、并要求签署保密协议（约80万元和解）。",i:"若交易无效、资金虚增，何须真金白银赔付约80万并要求保密？这是对交易有效、且账上确有一笔20,000股真实回购的变相承认。"},
+   {who:"蓝公懋",q:"在中登查是最准确的。",i:"与孙嵘“中登找得到”呼应；起诉时却拒绝提供中登数据，属选择性误导。"},
+   {who:"孙嵘（第1次商谈）",q:"像您这样还没有解决的只有一两单……后来您就把这个钱花掉了对吧。",i:"承认当天同类异常订单不止一单、已批量“解决”，并自认上诉人已收到并动用回款——批量操作模式。"}
+  ];
+
+  var OPP=[
+   "复牌首日集合竞价出现4,000元等异常报价，属系统/行情异常，该笔成交不应以此价有效成立。",
+   "案涉委托未实际成交（第9号上交所反馈成交0股、0元；FIX OrdStatus/ExecType=4 撤单）。",
+   "客户使用了本不应到账的资金买入其他股票，券商在交收时垫付了资金缺口，构成不当得利，应予返还。",
+   "举证责任为“谁主张谁举证”（民诉法67条1款）；主张伪造者应指出具体伪造之处。",
+   "《民法典》157条：行为无效/被撤销的，因该行为取得的财产应予返还。"
+  ];
+  var FI=[
+   "认定委托卖出20,000股“未实际成交”，判令返还 ¥5,133,345.56。",
+   "判词：“被告证明不了原告数据是伪造的、伪造在哪。”",
+   "将案由改定为“证券纠纷”，裁判却援引《民法典》157条（而非985条不当得利）。",
+   "对涉嫌经济犯罪线索仅以“另循法律途径解决”一语带过。",
+   "认定券商系统有过错、判其承担约19万元诉讼费（约3.7%），却判无过错客户返还全额（100%）。"
+  ];
+  var WEAK=[
+   "“9:31盗资回购20,000股@17.336”是<b>强推断</b>，目前缺直接证据（无服务器日志、无港交所二级市场该笔成交回报）；成立与否高度依赖法院依职权调取后台数据。",
+   "撮合地点、完整FIX报文链、中登原始划转，均由对方独家掌握——你方<b>无法单独举证</b>，胜负系于法院是否调取（故二审请求第三、四项至关重要）。",
+   "缺口 ¥316,210.06 的费率拆分(252.48 / 357.14 / 315,600.44)与 17.336港元，依赖“以玖龙费率拆分”这一假设；对方可质疑拆分口径。",
+   "“交收完成”是否<b>当然</b>等于“成交效力无瑕疵”，存在解释空间，不能仅以 T+2 完成径直锁死效力。",
+   "“18港元(孙嵘口径) 对 17.336港元(数据)”的差异，须用附录二口径稳住，否则易被指自相矛盾。",
+   "三个“513万同源归一”论证精巧但需法官投入时间消化；庭上要能用一两句话讲清。",
+   "参考汇率 0.8828 系盘中显示/估算，<b>仅作展示</b>；任何结算计算必须用 0.90994 / 0.91026，混用会被对方抓住。",
+   "程序违法即便被二审认可，常见后果是<b>发回重审</b>，而非直接<b>改判驳回原告诉请</b>——你要的是后者。程序正义须与实体论证(结算定性、举证倒置、证据互殴)并用，单靠程序难以一步到位拿回钱。",
+   "“剥夺辩论权”“录音未当庭质证”等主张，若无<b>庭审录像</b>等客观佐证，较难单独坐实——务必申请调取庭审录像与笔录，把它从“你说”变成“有据”。"
+  ];
+  var REBUT=[
+   {q:"第9号反馈成交0股，岂非未成交？",a:"第9号以9:30开市后数据冒充开市前集合竞价订单（关公战秦琼），且与第5号(20,000股/600万)直接相反、又带 Js509 结算码——必有一伪，且自证已成交。"},
+   {q:"FIX显示已撤单(150/39=4)。",a:"同一报文却载成交价300、成交量20,000、CumQty=20,000、剩余0——若从未成交，此三项应为0/空。其非零值反证此前必有成交执行报告，属“成交后撤销”而非“从未成交”。"},
+   {q:"凭什么说有对手方、且是券商自己？",a:"Tag453=2两参与方、Tag448=53559券商单元被显性锁定；联交所复函排除公开市场买方。若为第三方则券商非受损方、无原告资格；若为自身则货银两讫后无权单方撤销——无论何者均导向券商败诉。"},
+   {q:"数据伪造在哪？（一审核心质问）",a:"三处铁证：0.09元组合费(账户查无)、两次扣款两次出错(港元面值当人民币)、第9号六处破绽；并请当庭核对账目，¥316,210.06缺口立现。"},
+   {q:"为何只追513万、不追546万？",a:"七笔买入已化为可追回的新股；暗中冲正消耗的31.6万因非法不敢见光，故讳言。只追513万本身即“结算已成”的自认。"},
+   {q:"本案应适用哪部法？",a:"证券经纪纠纷，依《立法法》103条特别法优先《证券法》《证券登记结算管理办法》。一审改案由为证券纠纷却用《民法典》157条裁判，体系错配；157条规范“已成立但无效”，与一审“从未成立”自相矛盾。"}
+  ];
+  var Q3=[
+   "人民币316,210.06元去了哪里？请提供保证金账户、自有资金账户与中国结算的资金划转明细。",
+   "9:31凭空回填、于上诉人买入前已在账的20,000股，系何人、何时、依何授权买入并退回？请提供操作记录与港交所二级市场成交回报。",
+   "9:20:39该卖单未经港交所撮合却在中登留交收痕迹，撮合发生于何处？请提供大陆侧撮合记录与完整FIX报文序列。"
+  ];
+
+  var PROC_TRIAL=[
+   {t:"违背全面、客观审查证据原则",law:"民诉法 67条③",d:"对第5号(成交2万股/600万)、第9号(成交0股/0元)、第7号(Tag31=300.000、Tag32=20000)三者之间的重大数据矛盾，未作任何审查比对；反将原告自身证据矛盾，转化为“被告未指出具体伪造之处”，以“无其他相反证据”为由全部采纳。"},
+   {t:"举证责任分配错误",law:"证券法 89条 · 民诉法 67条②",d:"未适用《证券法》第89条举证责任倒置(证券公司应自证合规、无误导欺诈)，亦未依《民诉法》第67条第二款依职权调取客户客观无法获取的服务器底层数据；把本应由强势方承担的举证责任，强加于无权限的普通投资者。"},
+   {t:"剥夺法定辩论权",law:"民诉法 12条 · 144条",d:"质证结束后，审判长问“如何证明原告证据系伪造”，客户答“可用数学方法证明，请给予5分钟陈述”，审判长当即打断、宣布结束庭审(庭审录像可证)。客户拟陈述的，正是真实七笔买单 ¥5,133,444.11、而起诉所凑的 ¥5,133,345.56 中混入交割单内并不存在的 ¥0.09 组合费。"},
+   {t:"认定基本事实不清",law:"民诉法 155条",d:"未查明不当得利核心要件“转入金额”，以“垫付之果”替代“转入之因”，因果关系倒置；委托成交额约546万、所谓“虚增”约528万、起诉追讨513万，三数相互矛盾、无法自洽。"},
+   {t:"对涉嫌经济犯罪线索未依法处理",law:"民诉法 115条 · 经济犯罪嫌疑规定 11条",d:"客户一审已明确指出约33万元资金缺口、凌晨改额删记录、第5号与第9号证据相反等线索；一审仅以“另循法律途径解决”一语带过。"},
+   {t:"录音证据未经当庭播放质证",law:"民诉法 71条 · 证据规定 68条",d:"录音属视听资料，依法须当庭出示质证；一审跳过当庭播放、仅凭券商书面质证意见认定，且未比对该书面意见是否如实反映录音内容，致孙嵘编造成交时间、“九倍限价”欺诈、自认“看到底牌”、约80万元和解方案等关键证据被遮蔽。"}
+  ];
+  var PROC_BROKER=[
+   "“系统故障”主张无任何技术证据——无故障时间、技术原因、影响范围、修复记录，亦无向证监局的报告记录。",
+   "非法冻结客户证券账户、银行账户及股票登记逾19个月，远超必要限度。",
+   "未依法启动“暂缓交收”程序：出现异常本应申请暂缓交收，券商弃此法定救济不用（《证券登记结算管理办法》）。",
+   "未依法行使处置权(平仓)即直接起诉，属滥用诉权：账户资产700余万元完全覆盖513万元，不满足“尚有不足”的追偿条件。",
+   "遍查股票交易史，爆仓强行平仓是常态，从未闻“垫付”之说——“垫付”叙事本身违背行业惯例。"
+  ];
+  var PROC_CRIM=[
+   {t:"移送依据",d:"经审理认为不属经济纠纷而有经济犯罪嫌疑的，应裁定驳回起诉并将材料移送公安/检察机关——《最高人民法院关于在审理经济纠纷案件中涉及经济犯罪嫌疑若干问题的规定》第11条。"},
+   {t:"中止审理之备选",d:"如二审认为民事审理须以刑事案件结果为依据，可依《民诉法》第153条第(五)项中止诉讼，并参照《九民纪要》第130条先行移送、中止审理。"},
+   {t:"一审之失",d:"一审强行以民事案件审理、对犯罪线索“一语带过”，属严重程序违法。"}
+  ];
+  function renderProc(){
+    var a=document.getElementById("procTrial");var h="";for(var i=0;i<PROC_TRIAL.length;i++){var p=PROC_TRIAL[i];h+="<div class='pcard'><div class='ph' style='background:var(--court)'><span class='pn'>"+(i+1)+"． "+p.t+"</span><span class='ptag'>违 "+p.law+"</span></div><div class='pb'>"+p.d+"</div></div>";}a.innerHTML=h;
+    var b=document.getElementById("procBroker");var hb="";for(var j=0;j<PROC_BROKER.length;j++)hb+="<div class='arg'>"+PROC_BROKER[j]+"</div>";b.innerHTML=hb;
+    var c=document.getElementById("procCrim");var hc="";for(var k=0;k<PROC_CRIM.length;k++){var q=PROC_CRIM[k];hc+="<div class='weak'><b>"+q.t+"：</b>"+q.d+"</div>";}c.innerHTML=hc;
+  }
+
+  function el(html){var d=document.createElement("div");d.innerHTML=html;return d.firstElementChild;}
+
+  function renderChips(){var c=document.getElementById("chips");c.innerHTML="";for(var i=0;i<LABELS.length;i++){var b=document.createElement("button");b.className="chip"+(i===idx?" active":"");b.setAttribute("data-action","go");b.setAttribute("data-i",i);b.innerHTML="<b>"+(i===0?"·":i)+"</b>"+LABELS[i];c.appendChild(b);}}
+
+  function renderTimeline(){var t=document.getElementById("tline");var h="";for(var i=0;i<TIMELINE.length;i++){var n=TIMELINE[i];h+="<div class='tnode "+n.k+"' data-action='tnode' data-i='"+i+"'><div class='head'><div class='tt'>"+n.t+"</div><div class='th'>"+n.h+"</div></div><div class='td'>"+n.d+"</div></div>";}t.innerHTML=h;}
+  function tnode(i){var nodes=document.querySelectorAll(".tnode");nodes[i].classList.toggle("open");}
+
+  function renderLedger(m){var L=LEDGERS[m],h="";h+="<div class='ledger'><div class='lhead "+L.cls+"'><span>"+L.title+"</span><span class='badge'>"+L.badge+"</span></div>";for(var i=0;i<L.rows.length;i++){var r=L.rows[i];h+="<div class='row"+(r.total?" total":"")+"'><span class='lbl'>"+r.l+"</span><span class='val "+(r.c||"")+"'>"+r.v+"</span></div>";}h+="<div class='lfoot'>"+L.foot+"</div></div>";document.getElementById("ledgerBox").innerHTML=h;}
+  function setModel(m){renderLedger(m);document.getElementById("tg-settle").className="settle"+(m==="settle"?" on":"");document.getElementById("tg-advance").className="advance"+(m==="advance"?" on":"");}
+
+  function renderBuys(){var t=document.getElementById("buys");var h="<tr><th>序</th><th>证券（代码）</th><th>数量(股)</th><th>港币价</th><th>发生金额(¥)</th><th>剩余金额(¥)</th></tr>";for(var i=0;i<BUYS.length;i++){var r=BUYS[i];h+="<tr><td>"+r[0]+"</td><td class='l'>"+r[1]+"</td><td>"+r[2]+"</td><td>"+r[3]+"</td><td>"+r[4]+"</td><td>"+r[5]+"</td></tr>";}h+="<tr class='sum'><td colspan='4' class='l'>合计（交割前余额 ¥98.64 起逐笔累加）</td><td>−5,133,444.11</td><td>−5,133,345.47</td></tr>";t.innerHTML=h;}
+
+  function renderProofs(){var box=document.getElementById("proofs");var h="";for(var i=0;i<PROOFS.length;i++){var p=PROOFS[i];h+="<div class='pcard'><div class='ph'><span class='pn'>"+p.n+" · "+p.t+"</span><span class='ptag'>"+p.tag+"</span></div><div class='pb'>"+p.b+"</div></div>";}box.innerHTML=h;
+    var t=document.getElementById("three");var th="<tr><th>序</th><th>出处</th><th>勾稽等式</th><th>结果(¥)</th></tr>";for(var j=0;j<THREE.length;j++){var r=THREE[j];th+="<tr><td>"+r[0]+"</td><td class='l'>"+r[1]+"</td><td class='l'>"+r[2]+"</td><td>"+r[3]+"</td></tr>";}t.innerHTML=th;}
+
+  function renderFix(){var box=document.getElementById("fix");var h="";for(var i=0;i<FIX.length;i++){var f=FIX[i];h+="<div class='fixrow"+(f.warn?" warn":"")+"'><span class='ftag'>"+f.tag+"</span><span class='fv'>"+f.v+"</span><span class='fn'>"+f.n+"</span></div>";}box.innerHTML=h;}
+
+  function renderQuotes(){var box=document.getElementById("quotes");var h="";for(var i=0;i<QUOTES.length;i++){var q=QUOTES[i];h+="<div class='qcard"+(q.keep?" keep":"")+"'><div class='qw'>"+q.who+"</div><div class='qq'>"+q.q+"</div><div class='qi'>"+q.i+"</div></div>";}box.innerHTML=h;}
+
+  function renderTrain(){
+    var o=document.getElementById("pane-opp");var ho="<h2 class='sub' style='margin-top:0'>对方（券商）主张</h2>";for(var i=0;i<OPP.length;i++)ho+="<div class='arg'>"+OPP[i]+"</div>";ho+="<h2 class='sub'>一审判决理由</h2>";for(var j=0;j<FI.length;j++)ho+="<div class='arg fi'>"+FI[j]+"</div>";o.innerHTML=ho;
+    var w=document.getElementById("pane-weak");var hw="<p class='small'>直面这些，才能在二审提前补强。</p>";for(var k=0;k<WEAK.length;k++)hw+="<div class='weak'>"+WEAK[k]+"</div>";w.innerHTML=hw;
+    var r=document.getElementById("pane-rebut");var hr="<p class='small'>点击展开你的回应——可反复自测。</p>";for(var m=0;m<REBUT.length;m++)hr+="<div class='flip' data-action='flip'><button><span class='qf'>问："+REBUT[m].q+"</span><span class='pm'>＋</span></button><div class='ans'><b>答：</b>"+REBUT[m].a+"</div></div>";r.innerHTML=hr;
+    var q=document.getElementById("pane-q3");var hq="<h2 class='sub' style='margin-top:0'>恳请二审法院当庭责令对方回答</h2><ul class='q3'>";for(var n=0;n<Q3.length;n++)hq+="<li>"+Q3[n]+"</li>";hq+="</ul><div class='note'>答不出、或拿不出，即应承担举证不能的后果。</div>";q.innerHTML=hq;
+  }
+  function seg(name){var btns=document.querySelectorAll(".seg button");for(var i=0;i<btns.length;i++)btns[i].classList.toggle("on",btns[i].getAttribute("data-seg")===name);var panes=["opp","weak","rebut","q3"];for(var j=0;j<panes.length;j++)document.getElementById("pane-"+panes[j]).classList.toggle("show",panes[j]===name);}
+
+  function flip(node){node.classList.toggle("open");var pm=node.querySelector(".pm");if(pm)pm.textContent=node.classList.contains("open")?"−":"＋";}
+
+  function go(i){if(isNaN(i))i=0;i=Math.max(0,Math.min(LABELS.length-1,i));idx=i;for(var k=0;k<pages.length;k++)pages[k].classList.toggle("show",k===i);renderChips();document.getElementById("bar").style.width=(i/(LABELS.length-1)*100)+"%";document.getElementById("posLabel").textContent=(i===0?"封面":i+" / "+(LABELS.length-1))+" · "+LABELS[i];document.getElementById("prev").disabled=(i===0);var nx=document.getElementById("next");nx.textContent=(i===LABELS.length-1)?"已是最后一页":"下一页 →";nx.disabled=(i===LABELS.length-1);window.scrollTo({top:0,behavior:"smooth"});var act=document.querySelector(".chip.active");if(act&&act.scrollIntoView)act.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"});}
+  function openDisc(){document.getElementById("disc").classList.add("show")}
+  function closeDisc(){document.getElementById("disc").classList.remove("show")}
+
+  document.addEventListener("click",function(e){
+    var t=e.target.closest?e.target.closest("[data-action]"):null;
+    if(!t){if(e.target&&e.target.id==="disc")closeDisc();return;}
+    var a=t.getAttribute("data-action");
+    if(a==="go")go(parseInt(t.getAttribute("data-i"),10));
+    else if(a==="prev")go(idx-1);
+    else if(a==="next")go(idx+1);
+    else if(a==="tnode")tnode(parseInt(t.getAttribute("data-i"),10));
+    else if(a==="model")setModel(t.getAttribute("data-model"));
+    else if(a==="seg")seg(t.getAttribute("data-seg"));
+    else if(a==="flip")flip(t);
+    else if(a==="disc-open")openDisc();
+    else if(a==="disc-close")closeDisc();
+  });
+  document.addEventListener("keydown",function(e){if(e.key==="ArrowRight")go(idx+1);else if(e.key==="ArrowLeft")go(idx-1);else if(e.key==="Escape")closeDisc();});
+
+  renderChips();renderTimeline();setModel("settle");renderBuys();renderProofs();renderFix();renderQuotes();renderTrain();renderProc();go(0);
+})();
+</script>
+</body>
+</html>

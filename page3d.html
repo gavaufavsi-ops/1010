@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>客户账户全程数据 · 慢动作演示（2024.10.10 — 10.16）</title>
+<style>
+:root{
+  --paper:#f7f2e6;        /* 宣纸 */
+  --paper-line:#e3d9c2;   /* 账本横线 */
+  --ink:#211d18;          /* 墨 */
+  --muted:#6f6553;
+  --cinnabar:#b5301f;     /* 朱砂（动手脚/指纹） */
+  --cinnabar-bg:#fbe9e5;
+  --jade:#1b6e4a;         /* 翠（勾稽相符/入账） */
+  --jade-bg:#e7f3ec;
+  --amber:#9a6200;
+  --amber-bg:#fdf3da;
+  --navy:#2c4763;         /* 章节靛青 */
+  --line:#d8cdb4;
+  --serif:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+  --sans:"Noto Sans SC","PingFang SC","Microsoft YaHei","Heiti SC",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:20px}
+body{
+  font-family:var(--sans);color:var(--ink);
+  background:
+    repeating-linear-gradient(180deg, transparent 0 46px, var(--paper-line) 46px 47px),
+    radial-gradient(1200px 600px at 50% -10%, #fffdf6, transparent 60%),
+    var(--paper);
+  min-height:100vh;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:22px 18px 150px}
+
+/* ===== 头部 ===== */
+header{text-align:center;padding:6px 0 14px;border-bottom:3px double var(--ink)}
+.kicker{font-size:.82rem;letter-spacing:.18em;color:var(--cinnabar);font-weight:700}
+h1{font-family:var(--serif);font-weight:900;font-size:clamp(28px,4.6vw,46px);letter-spacing:.06em;margin:.25em 0 .15em}
+.sub{font-size:clamp(15px,2.2vw,21px);color:var(--muted);letter-spacing:.12em}
+
+/* ===== 章节条 ===== */
+nav#chapters{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0 14px}
+nav#chapters button{
+  font-family:var(--serif);font-weight:700;font-size:.92rem;letter-spacing:.06em;
+  border:1.5px solid var(--navy);color:var(--navy);background:transparent;
+  border-radius:999px;padding:.42em 1em;cursor:pointer;
+}
+nav#chapters button.on{background:var(--navy);color:#fdfaf2}
+
+/* ===== 舞台 ===== */
+.stage{
+  background:#fffdf6;border:1.5px solid var(--line);border-radius:14px;
+  box-shadow:0 10px 30px rgba(60,45,20,.10);
+  padding:clamp(16px,3vw,30px);
+  border-top:6px solid var(--navy);
+  transition:border-color .6s;
+}
+.stage.tone-warn{border-top-color:var(--cinnabar);box-shadow:0 10px 34px rgba(181,48,31,.18)}
+.stage.tone-good{border-top-color:var(--jade);box-shadow:0 10px 34px rgba(27,110,74,.16)}
+
+.stephead{display:flex;flex-direction:column;gap:8px;align-items:center;text-align:center;margin-bottom:14px}
+.time{
+  font-weight:900;font-size:clamp(22px,3.6vw,34px);letter-spacing:.08em;
+  font-variant-numeric:tabular-nums;color:var(--navy);
+}
+.stage.tone-warn .time{color:var(--cinnabar)}
+.stage.tone-good .time{color:var(--jade)}
+.badges{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:1.4em}
+.badge{font-size:.86rem;font-weight:800;border-radius:8px;padding:.28em .7em;letter-spacing:.04em}
+.badge.warn{background:var(--cinnabar);color:#fff}
+.badge.fp{border:2px solid var(--cinnabar);color:var(--cinnabar);background:var(--cinnabar-bg)}
+.badge.good{background:var(--jade);color:#fff}
+.badge.ver{border:2px solid var(--jade);color:var(--jade);background:var(--jade-bg)}
+.title{font-family:var(--serif);font-weight:900;font-size:clamp(24px,4vw,38px);letter-spacing:.04em}
+
+/* ===== 双账格 ===== */
+.dash{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin:10px 0 14px}
+.tile{
+  border:1.5px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fffef9,#fbf6e9);
+  padding:14px 16px;text-align:center;position:relative;overflow:hidden;
+}
+.tlabel{font-size:clamp(15px,2vw,19px);font-weight:700;color:var(--muted);letter-spacing:.06em;min-height:1.5em}
+.tnum{
+  font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap;
+  font-size:clamp(40px,7.4vw,84px);line-height:1.15;letter-spacing:.01em;margin:.04em 0;
+  transition:color .4s;
+}
+.tnum.long{font-size:clamp(32px,6vw,66px)}
+.tnum.neg{color:var(--cinnabar)}
+.tnum.pos{color:var(--jade)}
+.tnum.struck{text-decoration:line-through;text-decoration-color:var(--cinnabar);text-decoration-thickness:5px;opacity:.55}
+.tnum2{font-weight:900;font-variant-numeric:tabular-nums;font-size:clamp(34px,5.6vw,64px);line-height:1.2}
+.tdelta{min-height:1.5em;font-size:clamp(15px,2.1vw,20px);font-weight:800;letter-spacing:.02em}
+.tdelta.down{color:var(--cinnabar)} .tdelta.up{color:var(--jade)} .tdelta.note{color:var(--amber)}
+.tnote{font-size:.82rem;color:var(--muted);min-height:1.3em;margin-top:2px}
+.holdings{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px;min-height:1.6em}
+.chip{font-size:.82rem;font-weight:700;border:1.5px solid var(--line);border-radius:999px;padding:.2em .65em;background:#fff;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* ===== 事件卡区 ===== */
+.cardzone{margin:8px 0 14px;min-height:40px}
+.card{border:1.5px solid var(--line);border-radius:12px;background:#fff;padding:16px 18px;animation:rise .8s both}
+.card.warn{border-color:var(--cinnabar);background:var(--cinnabar-bg)}
+.card.good{border-color:var(--jade);background:var(--jade-bg)}
+.card.amber{border-color:var(--amber);background:var(--amber-bg)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* 表格 */
+table.tb{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:clamp(15px,2vw,19px)}
+table.tb th,table.tb td{padding:.42em .5em;border-bottom:1px solid var(--paper-line);text-align:right}
+table.tb th:first-child,table.tb td:first-child{text-align:left}
+table.tb tr.total td{border-top:2.5px solid var(--ink);border-bottom:none;font-weight:900}
+table.tb tr.now td{background:var(--amber-bg);font-weight:900}
+table.tb td.neg{color:var(--cinnabar);font-weight:700}
+.tb-cap{font-weight:800;font-size:.95rem;letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
+
+/* 当前买入卡 */
+.buy-now{display:flex;flex-wrap:wrap;align-items:baseline;gap:.5em .9em;font-size:clamp(18px,2.8vw,26px);font-weight:800;margin-bottom:10px}
+.buy-now .bi{font-family:var(--serif);font-size:1.5em;color:var(--navy)}
+.buy-now .ba{margin-left:auto;color:var(--cinnabar);font-variant-numeric:tabular-nums}
+.buy-now i{font-style:normal;color:var(--muted);font-size:.78em;font-weight:700}
+
+/* 算式 */
+.eq{display:flex;flex-wrap:wrap;align-items:stretch;justify-content:center;gap:10px;margin:6px 0}
+.eq .term{
+  border:2px solid var(--line);border-radius:10px;background:#fffdf6;padding:.5em .8em;text-align:center;
+  opacity:0;animation:rise .8s both;animation-delay:calc(var(--i)*.55s);
+}
+.eq .term b{display:block;font-size:clamp(20px,3.4vw,32px);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.eq .term i{display:block;font-style:normal;font-size:.82rem;color:var(--muted);font-weight:700;margin-top:2px}
+.eq .term.red{border-color:var(--cinnabar)} .eq .term.red b{color:var(--cinnabar)}
+.eq .term.green{border-color:var(--jade)} .eq .term.green b{color:var(--jade)}
+.eq .op{align-self:center;font-size:clamp(24px,4vw,38px);font-weight:900;color:var(--muted);opacity:0;animation:rise .8s both;animation-delay:calc(var(--i)*.55s)}
+.eqnote{text-align:center;font-size:clamp(15px,2vw,19px);color:var(--muted);font-weight:700;margin-top:6px}
+
+/* 印章 */
+.sealrow{text-align:center;margin-top:12px}
+.seal{
+  display:inline-block;font-family:var(--serif);font-weight:900;letter-spacing:.08em;
+  font-size:clamp(20px,3vw,30px);color:var(--jade);
+  border:3.5px solid var(--jade);border-radius:12px;padding:.22em .7em;
+  transform:rotate(-5deg);background:rgba(231,243,236,.6);
+  box-shadow:0 0 0 2px rgba(27,110,74,.12) inset;
+  animation:stamp .9s cubic-bezier(.2,1.4,.4,1) both;animation-delay:2.2s;
+}
+.seal.red{color:var(--cinnabar);border-color:var(--cinnabar);background:rgba(251,233,229,.6);box-shadow:0 0 0 2px rgba(181,48,31,.12) inset}
+@keyframes stamp{0%{opacity:0;transform:rotate(-5deg) scale(2.1)}60%{opacity:1;transform:rotate(-5deg) scale(.94)}100%{opacity:1;transform:rotate(-5deg) scale(1)}}
+
+/* 指纹四宫格 / 终局 */
+.fp4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.fp{border:2px solid var(--cinnabar);background:#fff;border-radius:10px;padding:10px 12px;font-weight:800;font-size:clamp(15px,2.1vw,19px)}
+.fp b{display:block;color:var(--cinnabar);font-family:var(--serif);letter-spacing:.06em;margin-bottom:2px}
+.fp span{display:block;font-weight:600;color:var(--muted);font-size:.85em;margin-top:3px;font-variant-numeric:tabular-nums}
+.finline{font-size:clamp(16px,2.3vw,21px);font-weight:800;text-align:center;margin-top:8px;font-variant-numeric:tabular-nums}
+.finline.red{color:var(--cinnabar)}
+
+/* 序章章节单 */
+.chap-list{display:grid;gap:8px;font-size:clamp(16px,2.3vw,21px);font-weight:700}
+.chap-list div{border-left:5px solid var(--navy);padding:.3em .7em;background:#fffdf6}
+.chap-list b{font-family:var(--serif);color:var(--navy);margin-right:.6em}
+
+/* 删痕 */
+.delrows{display:grid;gap:8px;font-variant-numeric:tabular-nums;font-weight:800;font-size:clamp(17px,2.5vw,23px)}
+.delrows div{position:relative;padding:.3em .2em;color:var(--muted)}
+.delrows div::after{content:"";position:absolute;left:0;right:0;top:50%;height:4px;background:var(--cinnabar);transform:scaleX(0);transform-origin:left;animation:strike 1.2s ease forwards}
+.delrows div:nth-child(2)::after{animation-delay:.7s}
+@keyframes strike{to{transform:scaleX(1)}}
+
+/* 解说 */
+.narr{
+  font-size:clamp(19px,2.7vw,26px);line-height:1.8;letter-spacing:.02em;
+  background:linear-gradient(180deg,#fffef9,#fcf7ea);
+  border:1.5px solid var(--line);border-left:6px solid var(--navy);
+  border-radius:12px;padding:16px 20px;min-height:5.4em;
+}
+.stage.tone-warn .narr{border-left-color:var(--cinnabar)}
+.stage.tone-good .narr{border-left-color:var(--jade)}
+.narr b{color:var(--cinnabar)} .narr em{font-style:normal;color:var(--jade);font-weight:800}
+.narr u{text-decoration:none;background:linear-gradient(transparent 62%, #f6dfae 62%);font-weight:800}
+
+/* ===== 控制台（固定底部） ===== */
+.ctrl{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;
+  background:rgba(33,29,24,.96);color:#f4eddc;backdrop-filter:blur(4px);
+  padding:10px 14px 12px;box-shadow:0 -8px 26px rgba(0,0,0,.25);
+}
+.ctrl .inner{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.ctrl button{
+  font-family:var(--sans);font-weight:900;font-size:clamp(17px,2.4vw,22px);
+  border:2px solid #f4eddc;background:transparent;color:#f4eddc;
+  border-radius:12px;padding:.5em 1.1em;cursor:pointer;min-height:54px;
+}
+.ctrl button.primary{background:var(--cinnabar);border-color:var(--cinnabar);min-width:9.5em}
+.ctrl button:disabled{opacity:.35;cursor:default}
+.ctrl .meta{font-size:.95rem;gap:14px}
+.speed button{min-height:42px;padding:.25em .8em;font-size:1rem}
+.speed button.on{background:#f4eddc;color:var(--ink)}
+.count{font-variant-numeric:tabular-nums;font-weight:800;letter-spacing:.05em}
+.bar{height:8px;border-radius:99px;background:rgba(244,237,220,.22);overflow:hidden}
+#barFill{height:100%;width:0;background:linear-gradient(90deg,var(--jade),#8fd6b4);transition:width .8s}
+
+/* 资料来源 */
+.source{margin-top:18px;text-align:center;font-size:.85rem;color:var(--muted);line-height:1.7}
+
+@media (max-width:720px){
+  html{font-size:18px}
+  .dash{grid-template-columns:1fr}
+  .fp4{grid-template-columns:1fr}
+  .wrap{padding-bottom:190px}
+}
+@media (prefers-reduced-motion: reduce){
+  .card,.eq .term,.eq .op{animation:none;opacity:1}
+  .seal{animation:none;opacity:1}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">全部数据出自国泰海通自认材料与官方交割单 · 算术逐项闭合 · 差额 ¥0.00</div>
+    <h1>客户账户全程数据 · 慢动作演示</h1>
+    <div class="sub">2024年10月10日 委托卖出 ──→ 10月16日 交割结算终局</div>
+  </header>
+
+  <nav id="chapters"></nav>
+
+  <main class="stage" id="stage">
+    <div class="stephead">
+      <div class="time" id="stTime"></div>
+      <div class="badges" id="stBadges"></div>
+      <h2 class="title" id="stTitle"></h2>
+    </div>
+
+    <section class="dash">
+      <div class="tile">
+        <div class="tlabel" id="cashLabel">账户现金</div>
+        <div class="tnum" id="cashNum">——</div>
+        <div class="tdelta" id="cashDelta"></div>
+        <div class="tnote" id="cashNote"></div>
+      </div>
+      <div class="tile">
+        <div class="tlabel">国泰君安Ｈ股（02611）持股</div>
+        <div class="tnum2" id="shareNum">——</div>
+        <div class="tdelta" id="shareDelta"></div>
+        <div class="holdings" id="holdings"></div>
+      </div>
+    </section>
+
+    <section class="cardzone" id="cardzone"></section>
+
+    <section class="narr" id="narr"></section>
+  </main>
+
+  <div class="source">
+    数据出处：国泰海通《代理意见》（2025-05-26 庭审）与《起诉状》之书面司法自认 · 官方交割单 · 账户截图（图6 / 图24 / 图25）。<br>
+    本演示仅作数据呈现，全部数字可逐项核对，无一出自我方臆测。
+  </div>
+</div>
+
+<footer class="ctrl">
+  <div class="inner">
+    <div class="row">
+      <button id="btnPrev">⏮ 上一步</button>
+      <button id="btnPlay" class="primary">▶ 开始播放</button>
+      <button id="btnNext">下一步 ⏭</button>
+    </div>
+    <div class="row meta">
+      <span class="speed">速度
+        <button data-s="ultra" class="on">超慢·每秒一变</button><button data-s="1">慢速</button><button data-s="0.55">中速</button>
+      </span>
+      <span class="count" id="stepCount"></span>
+      <button id="btnRestart" style="min-height:42px;padding:.25em .8em;font-size:1rem">⟲ 重播</button>
+      <button id="btnFull" style="min-height:42px;padding:.25em .8em;font-size:1rem">⛶ 全屏</button>
+    </div>
+    <div class="bar"><div id="barFill"></div></div>
+  </div>
+</footer>
+
+<script>
+"use strict";
+/* ---------- 工具 ---------- */
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const F = (v, d=2, c='¥') => (v<0?'−':'') + c + Math.abs(v).toLocaleString('zh-CN',{minimumFractionDigits:d,maximumFractionDigits:d});
+const $ = id => document.getElementById(id);
+
+function tween(el, from, to, dur, render){
+  if (el._raf) cancelAnimationFrame(el._raf);
+  if (RM || dur<=0 || from===to){ el.textContent = render(to); return; }
+  const t0 = performance.now();
+  const stepMode = ULTRA && dur > 1500;            /* 超慢：数字整秒跳变 */
+  const fr = t => {
+    let p = Math.min(1, (t - t0) / dur);
+    let v;
+    if (stepMode){
+      p = Math.min(1, Math.floor((t - t0) / 1000) * 1000 / dur);   /* 每满 1 秒变一次 */
+      v = from + (to - from) * p;                                   /* 等额递进，便于逐秒跟读 */
+    } else {
+      const e = p<.5 ? 4*p*p*p : 1 - Math.pow(-2*p+2,3)/2;
+      v = from + (to - from) * e;
+    }
+    el.textContent = render(v);
+    if (p < 1) el._raf = requestAnimationFrame(fr);
+  };
+  el._raf = requestAnimationFrame(fr);
+}
+
+/* ---------- 数据 ---------- */
+const BUYS = [
+  {i:'①', name:'国泰君安', code:'02611', qty:'92,800', px:'14.999', amt:1269444.44, rem:-1269345.80},
+  {i:'②', name:'中信证券', code:'06030', qty:'48,000', px:'21.800', amt:954313.06,  rem:-2223658.86},
+  {i:'③', name:'中信证券', code:'06030', qty:'72,500', px:'21.884', amt:1446956.30, rem:-3670615.16},
+  {i:'④', name:'中信证券', code:'06030', qty:'36,500', px:'21.697', amt:722261.22,  rem:-4392876.38},
+  {i:'⑤', name:'玖龙纸业', code:'02689', qty:'115,000', px:'3.510', amt:368136.17,  rem:-4761012.55},
+  {i:'⑥', name:'东阳光药', code:'01558', qty:'22,400', px:'9.070', amt:185337.50,  rem:-4946350.05},
+  {i:'⑦', name:'东阳光药', code:'01558', qty:'22,600', px:'9.070', amt:186995.42,  rem:-5133345.47},
+];
+const HOLD = [
+  [], [['中信证券',48000]], [['中信证券',120500]], [['中信证券',157000]],
+  [['中信证券',157000],['玖龙纸业',115000]],
+  [['中信证券',157000],['玖龙纸业',115000],['东阳光药',22400]],
+  [['中信证券',157000],['玖龙纸业',115000],['东阳光药',45000]],
+];
+
+function buyCard(bi){
+  const b = BUYS[bi];
+  let rows = '';
+  for (let k=0; k<=bi; k++){
+    const r = BUYS[k];
+    rows += `<tr class="${k===bi?'now':''}"><td>${r.i} ${r.name}</td><td>${r.qty} 股</td><td class="neg">−${F(r.amt,2,'')}</td><td class="neg">${F(r.rem)}</td></tr>`;
+  }
+  let total = '';
+  if (bi===BUYS.length-1) total = `<tr class="total"><td>七笔合计</td><td></td><td class="neg">−5,133,444.11</td><td class="neg">−¥5,133,345.47</td></tr>`;
+  return `<div class="card">
+    <div class="buy-now"><span class="bi">${b.i}</span><span class="bn">${b.name} <i>(${b.code})</i></span><span>${b.qty} 股 × HK$${b.px}</span><span class="ba">−¥${F(b.amt,2,'')}</span></div>
+    <div class="tb-cap">官方交割单 · 逐笔轧减（剩余金额自 ¥98.64 起）</div>
+    <table class="tb"><tr><th>买入</th><th>数量</th><th>发生金额(¥)</th><th>剩余金额</th></tr>${rows}${total}</table>
+  </div>`;
+}
+
+function eq(parts, note, seal, sealRed){
+  let i = 0;
+  const html = parts.map(p => p.op
+    ? `<span class="op" style="--i:${i++}">${p.op}</span>`
+    : `<span class="term ${p.cls||''}" style="--i:${i++}"><b>${p.n}</b><i>${p.s||''}</i></span>`
+  ).join('');
+  return `<div class="card"><div class="eq">${html}</div>${note?`<div class="eqnote">${note}</div>`:''}${seal?`<div class="sealrow"><span class="seal ${sealRed?'red':''}">${seal}</span></div>`:''}</div>`;
+}
+
+/* ---------- 步骤 ---------- */
+const STEPS = [
+/*0 序章*/
+{ ch:0, t:'2024年10月10日 — 10月16日', title:'开演之前 · 五章看全', tone:'normal',
+  cash:null, sh:null,
+  card:`<div class="card"><div class="chap-list">
+    <div><b>第一章</b>钱从哪来 · 委托卖出与回款入账</div>
+    <div><b>第二章</b>钱到哪去 · 暗中回购 ＋ 七笔买入</div>
+    <div><b>第三章</b>深夜改账 · 两次扣款与删除记录</div>
+    <div><b>第四章</b>交割终局 · 账户由负转正</div>
+    <div><b>第五章</b>勾稽验证 · 算术逐项闭合 差额 ¥0.00</div>
+  </div></div>`,
+  narr:`本演示以<u>慢动作</u>完整重演：自 2024 年 10 月 10 日早上委托卖出起，至 10 月 16 日交割结算止——客户账户每一笔数据的变动、券商每一处动手脚的痕迹、以及全案数字如何<em>分毫闭环</em>。全部数据出自<u>券商自认材料与官方交割单</u>。请点下方红色「<b>▶ 开始播放</b>」，亦可用「上一步／下一步」手动细看。`,
+  dwell:9000 },
+
+/*1*/
+{ ch:1, t:'10月10日 · 开盘前', title:'账户固有状态', tone:'normal',
+  cash:{v:99.13, from:0, label:'账户现金（真实人民币）', note:'账户固有现金'},
+  sh:{v:20000},
+  narr:`开盘前，账户固有现金 <em>¥99.13</em>，持有国泰君安Ｈ股（02611）共 <em>20,000 股</em>。当天正是该股<u>复牌之日</u>。`},
+
+/*2*/
+{ ch:1, t:'10月10日 · 开盘前', title:'扣收港股通组合费 ¥0.49', tone:'normal',
+  cash:{v:98.64, label:'账户现金（真实人民币）', delta:'− ¥0.49　港股通组合费', dk:'down', note:'对方书面自认：「被告账户余额实际仅有人民币 98.64 元」'},
+  sh:{v:20000},
+  narr:`券商照常扣收港股通组合费 <b>¥0.49</b>，现金余额变为 <em>¥98.64</em>——此数为对方《代理意见》<u>白纸黑字自认</u>。请记住：<u>真实组合费是 0.49 元</u>，后面它还会再登场。`},
+
+/*3*/
+{ ch:1, t:'10月10日 09:06:52', title:'客户委托卖出 20,000 股', tone:'normal',
+  cash:{v:98.64, label:'账户现金（真实人民币）'},
+  sh:{v:20000, delta:'挂单卖出 · 限价 HK$300/股', dk:'note'},
+  narr:`上午 <em>9 点 06 分 52 秒</em>，客户委托卖出全部 20,000 股，限价每股 <em>HK$300</em>。`},
+
+/*4*/
+{ ch:1, t:'10月10日 09:20:39', title:'场外成交 · 毛款 HK$6,000,000', tone:'normal',
+  badges:[{t:'指纹① 收费必有交易',k:'fp'}],
+  cash:{v:6000000, from:0, cur:'HK$', label:'卖出成交毛款（港币）', delta:'20,000 股 × HK$300', dk:'up'},
+  sh:{v:20000},
+  card:`<div class="card amber"><div class="finline" style="margin:0">该笔成交须缴香港印花税 <b style="color:var(--cinnabar)">¥5,459.64</b>（成交额 × 0.1%，香港政府征收）</div><div class="eqnote">印花税<u>只对「已成交」征收</u> —— 收了税，即证明交易已成交并结算。</div></div>`,
+  narr:`<em>9 点 20 分 39 秒</em>，20,000 股以每股 300 港元<u>场外成交</u>，毛款 <em>HK$6,000,000</em>。香港政府按成交额 0.1% 征收印花税 <b>¥5,459.64</b>——印花税只对「已成交」征收。<u>收费必有交易</u>（指纹①在此埋下）。`},
+
+/*5*/
+{ ch:1, t:'10月10日 09:24', title:'卖出交收 · 持股归零', tone:'normal',
+  cash:{v:6000000, cur:'HK$', label:'卖出成交毛款（港币）'},
+  sh:{v:0, delta:'20,000 → 0　股份划出', dk:'down'},
+  narr:`<em>9 点 24 分</em>，卖出的股份交收划出，账户持股<u>归零</u>。`},
+
+/*6*/
+{ ch:1, t:'10月10日 · 回款折算', title:'结算汇率 0.90994 · 折人民币毛款', tone:'normal',
+  cash:{v:5459640.00, from:0, label:'折算人民币毛款（结算汇率 0.90994）', delta:'HK$6,000,000 × 0.90994', dk:'up', note:'T+2 实际到账口径 · 本演示主线'},
+  sh:{v:0},
+  narr:`这笔 600 万港元货款，按 T+2 交收的<u>结算汇率 0.90994</u> 折算，等于人民币 <em>¥5,459,640.00</em>。这是<u>实际到账口径</u>，也是本演示的主线。`},
+
+/*7*/
+{ ch:1, t:'10月10日 · 扣费', title:'扣六项费用 ¥10,084.47 → 净回款', tone:'normal',
+  cash:{v:5449555.53, label:'净回款（卖股新进账）', delta:'− ¥10,084.47　六项费用（对方自认）', dk:'down'},
+  sh:{v:0},
+  card:`<div class="card"><div class="tb-cap">卖出端固定费用及佣金 · 合计 ¥10,084.47（对方自认）</div>
+  <table class="tb">
+  <tr><td>印花税</td><td>香港政府 · 0.1%</td><td>5,459.64</td></tr>
+  <tr><td>佣金</td><td>券商（可径退）</td><td>4,069.77</td></tr>
+  <tr><td>经手费</td><td>交易所</td><td>308.47</td></tr>
+  <tr><td>证管费</td><td>证监会</td><td>147.41</td></tr>
+  <tr><td>清算费</td><td>中央结算（封顶 HK$100）</td><td>90.99</td></tr>
+  <tr><td>其他费</td><td>财汇局</td><td>8.19</td></tr>
+  <tr class="total"><td>合计</td><td></td><td>10,084.47</td></tr>
+  </table></div>`,
+  narr:`从毛款中扣除六项固定费用与佣金，合计 <b>¥10,084.47</b>（对方书面自认「扣除固定费用及佣金共 10,084.47 元」）。扣完之后，净回款 <em>¥5,449,555.53</em>——这是卖股「<u>新进账</u>」的钱。`},
+
+/*8*/
+{ ch:1, t:'10月10日 · 资金总盘', title:'可用资金 ＝ 净回款 ＋ 原余额', tone:'good',
+  cash:{v:5449654.17, label:'可用资金（账户能动用）', delta:'＋ ¥98.64　原有余额', dk:'up'},
+  sh:{v:0},
+  card: eq([
+    {n:'98.64', s:'钱包原有'}, {op:'＋'},
+    {n:'5,449,555.53', s:'卖股新进账'}, {op:'＝'},
+    {n:'5,449,654.17', s:'能动用（可用资金）', cls:'green'}
+  ], '钱包类比：原有的 ＋ 新进账的 ＝ 能动用的'),
+  narr:`钱包类比：钱包里原有 <em>¥98.64</em>，卖股新进账 <em>¥5,449,555.53</em>，账户「能动用」的钱共 <em>¥5,449,654.17</em>。这就是全案<u>资金守恒的总盘子</u>——往后每一分钱，都要从这里对出去。`},
+
+/*9*/
+{ ch:2, t:'10月10日 09:31', title:'券商暗中回购 20,000 股（未经授权）', tone:'warn',
+  badges:[{t:'⚠ 券商动手脚 · 暗中回购',k:'warn'},{t:'指纹④ 之源',k:'fp'}],
+  cash:{v:5449654.17, label:'可用资金（明面显示 · 未变）', note:'回购成本藏于「暗处」，账面看不见'},
+  sh:{v:20000, delta:'0 → 20,000　暗中回填', dk:'down'},
+  card:`<div class="card warn"><div class="tb-cap" style="color:var(--cinnabar)">暗中回购 · 20,000 股 @ HK$17.336 · 成本构成</div>
+  <table class="tb">
+  <tr><td>股票本金</td><td>315,600.44</td></tr>
+  <tr><td>佣金</td><td>252.48</td></tr>
+  <tr><td>其他费</td><td>357.14</td></tr>
+  <tr class="total"><td>回购总成本</td><td style="color:var(--cinnabar)">¥316,210.06</td></tr>
+  </table></div>`,
+  narr:`<em>9 点 31 分</em>，券商<b>未经客户任何授权</b>，用客户回款暗中回购 <b>20,000 股</b>，每股 HK$17.336，总成本 <b>¥316,210.06</b>。这笔钱藏在「<u>暗处</u>」。请牢牢记住 <b>316,210.06</b>——它就是后面「缺口」的分毫来源。`,
+  dwell:10000},
+
+/*10–16 七笔买入*/
+{ ch:2, t:'10月10日 09:35', title:'客户买入 · 第①笔', tone:'normal',
+  cash:{v:-1269345.80, from:98.64, label:'交割单「剩余金额」（T+2 口径）', delta:'− ¥1,269,444.44　① 国泰君安', dk:'down', note:'卖出货款 T+2 才入账，故剩余金额暂为负，属港股通正常记账'},
+  sh:{v:112800, delta:'＋ 92,800 股　客户买入', dk:'up'}, hold:0,
+  card:buyCard(0),
+  narr:`<em>9 点 35 分</em>起客户正常买入。第①笔：国泰君安（02611）<em>92,800 股</em> × HK$14.999，发生金额 ¥1,269,444.44。交割单「剩余金额」自 ¥98.64 起<u>逐笔轧减</u>——因卖出货款 T+2 才入账，剩余金额暂为负数，系港股通正常记账方式。`},
+{ ch:2, t:'10月10日 09:35–09:38', title:'客户买入 · 第②笔', tone:'normal',
+  cash:{v:-2223658.86, label:'交割单「剩余金额」（T+2 口径）', delta:'− ¥954,313.06　② 中信证券', dk:'down'},
+  sh:{v:112800}, hold:1, card:buyCard(1),
+  narr:`第②笔：中信证券（06030）<em>48,000 股</em> × HK$21.800，发生金额 ¥954,313.06，剩余 −¥2,223,658.86。`},
+{ ch:2, t:'10月10日 09:35–09:38', title:'客户买入 · 第③笔', tone:'normal',
+  cash:{v:-3670615.16, label:'交割单「剩余金额」（T+2 口径）', delta:'− ¥1,446,956.30　③ 中信证券', dk:'down'},
+  sh:{v:112800}, hold:2, card:buyCard(2),
+  narr:`第③笔：中信证券 <em>72,500 股</em> × HK$21.884，发生金额 ¥1,446,956.30，剩余 −¥3,670,615.16。`},
+{ ch:2, t:'10月10日 09:35–09:38', title:'客户买入 · 第④笔', tone:'normal',
+  cash:{v:-4392876.38, label:'交割单「剩余金额」（T+2 口径）', delta:'− ¥722,261.22　④ 中信证券', dk:'down'},
+  sh:{v:112800}, hold:3, card:buyCard(3),
+  narr:`第④笔：中信证券 <em>36,500 股</em> × HK$21.697，发生金额 ¥722,261.22，剩余 −¥4,392,876.38。（中信三笔合计 157,000 股，与对方自认数一致。）`},
+{ ch:2, t:'10月10日 09:35–09:38', title:'客户买入 · 第⑤笔', tone:'normal',
+  cash:{v:-4761012.55, label:'交割单「剩余金额」（T+2 口径）', delta:'− ¥368,136.17　⑤ 玖龙纸业', dk:'down'},
+  sh:{v:112800}, hold:4, card:buyCard(4),
+  narr:`第⑤笔：玖龙纸业（02689）<em>115,000 股</em> × HK$3.510，发生金额 ¥368,136.17，剩余 −¥4,761,012.55。`},
+{ ch:2, t:'10月10日 09:35–09:38', title:'客户买入 · 第⑥笔', tone:'normal',
+  cash:{v:-4946350.05, label:'交割单「剩余金额」（T+2 口径）', delta:'− ¥185,337.50　⑥ 东阳光药', dk:'down'},
+  sh:{v:112800}, hold:5, card:buyCard(5),
+  narr:`第⑥笔：东阳光药（01558）<em>22,400 股</em> × HK$9.070，发生金额 ¥185,337.50，剩余 −¥4,946,350.05。`},
+{ ch:2, t:'10月10日 09:38', title:'客户买入 · 第⑦笔（末笔）', tone:'normal',
+  cash:{v:-5133345.47, label:'交割单「剩余金额」（T+2 口径）', delta:'− ¥186,995.42　⑦ 东阳光药', dk:'down', note:'末笔剩余 −5,133,345.47 ＝ −5,133,444.11 ＋ 98.64'},
+  sh:{v:112800}, hold:6, card:buyCard(6),
+  narr:`第⑦笔：东阳光药 <em>22,600 股</em> × HK$9.070，发生金额 ¥186,995.42，剩余 <b>−¥5,133,345.47</b>。七笔到此为止，<u>合计 ¥5,133,444.11</u>；末笔剩余 ＝ −5,133,444.11 ＋ 98.64——<em>逐笔轧减、分毫相扣</em>。`,
+  dwell:10000},
+
+/*17*/
+{ ch:3, t:'10月10日 12:17', title:'券商第一次手动扣款', tone:'warn',
+  badges:[{t:'⚠ 券商动手脚 · 第一次扣款',k:'warn'}],
+  cash:{v:5999900.87, from:0, label:'券商扣款金额（第一次 · 算法一）', note:'数额错误'},
+  sh:{v:112800}, hold:6,
+  card:`<div class="card warn"><div class="finline" style="margin:0;color:var(--cinnabar)">12:17　扣款 ¥5,999,900.87　——　算法一，错。</div></div>`,
+  narr:`中午 <em>12 点 17 分</em>，券商对账户第一次手动扣款 <b>¥5,999,900.87</b>——第一种算法，数额错误。`},
+
+/*18*/
+{ ch:3, t:'10月11日 02:28（次日凌晨）', title:'深夜改账 · 第二次扣款', tone:'warn',
+  badges:[{t:'⚠ 券商动手脚 · 深夜改账',k:'warn'},{t:'指纹② 人手操作',k:'fp'}],
+  cash:{v:5133345.06, label:'券商扣款金额（改第二次 · 算法二）', note:'又一个数额'},
+  sh:{v:112800}, hold:6,
+  card:`<div class="card warn"><table class="tb">
+  <tr><th>时间</th><th>扣款金额</th><th>结果</th></tr>
+  <tr><td>10/10　12:17</td><td>¥5,999,900.87</td><td class="neg">算法一 · 错</td></tr>
+  <tr class="now"><td>10/11　02:28</td><td>¥5,133,345.06</td><td class="neg">算法二 · 又一个数</td></tr>
+  </table><div class="eqnote">同一笔事，两次扣款、两个数额、深更半夜改账 —— <b style="color:var(--cinnabar)">机器不会半夜改主意，这是人手操作（指纹②）</b>。</div></div>`,
+  narr:`次日<em>凌晨 2 点 28 分</em>，扣款被改为 <b>¥5,133,345.06</b>——第二种算法，又是一个数。两次扣款、两个数额、深夜改账：<u>机器不会半夜改主意</u>，只有人手操作才会如此（指纹②）。`,
+  dwell:10000},
+
+/*19*/
+{ ch:3, t:'10月11日 02:34', title:'删除记录', tone:'warn',
+  badges:[{t:'⚠ 券商动手脚 · 删除记录',k:'warn'}],
+  cash:{v:5133345.06, label:'券商扣款金额（记录已删除）', struck:true},
+  sh:{v:112800}, hold:6,
+  card:`<div class="card warn"><div class="delrows">
+    <div>12:17　扣款 ¥5,999,900.87</div>
+    <div>02:28　改扣款 ¥5,133,345.06</div>
+  </div><div class="eqnote" style="color:var(--cinnabar);font-weight:900">02:34　相关记录被删除</div></div>`,
+  narr:`<em>凌晨 2 点 34 分</em>，相关记录被<b>删除</b>。先改账、再删痕——<u>此地无银三百两</u>。`},
+
+/*20*/
+{ ch:4, t:'10月15日 15:27 · 交割前快照（图24）', title:'账户资产显示 −406,334.40', tone:'warn',
+  badges:[{t:'⚠ 伪造显示 · 负资产',k:'warn'}],
+  cash:{v:-406334.40, from:0, label:'账户资产快照（10/15 15:27 · 图24）', note:'普通账户 · 非融资账户'},
+  sh:{v:112800}, hold:6,
+  card:`<div class="card warn"><div class="finline" style="margin:0;color:var(--cinnabar)">非融资账户依法依规不可能出现负资产</div><div class="eqnote">这个负值显示本身，就是伪造的痕迹。</div></div>`,
+  narr:`<em>10 月 15 日 15 点 27 分</em>（交割前快照·图24）：账户资产显示 <b>−¥406,334.40</b>。本案是普通账户、不是融资账户，依法依规<u>根本不可能出现负资产</u>——负值显示本身，就是伪造的痕迹。`},
+
+/*21*/
+{ ch:4, t:'10月16日 凌晨 · T+2 交收', title:'中国结算自动入账 ＋¥5,449,555.53', tone:'good',
+  badges:[{t:'中国结算 · 自动交收',k:'good'}],
+  cash:{v:5449555.53, from:0, label:'交收货款入账（中国结算 · T+2）', delta:'＋ ¥5,449,555.53　卖出货款', dk:'up', note:'客户未存入一分钱'},
+  sh:{v:112800}, hold:6,
+  card:`<div class="card good"><div class="finline" style="margin:0">中国结算（官方登记结算机构）　➜　客户账户　<em style="color:var(--jade);font-style:normal">＋¥5,449,555.53</em></div><div class="eqnote">T+2 自动交收 · 系统终局 · 客户没有存入一分钱</div></div>`,
+  narr:`<em>10 月 16 日凌晨</em>，T+2 交收：<u>中国结算</u>自动把卖出货款 <em>¥5,449,555.53</em> 划入账户。客户<u>没有存入一分钱</u>——钱是交易结算自己回来的。`},
+
+/*22*/
+{ ch:4, t:'10月16日 06:57 · 快照（图25）', title:'账户由负转正 · ¥4,780,986.80', tone:'good',
+  badges:[{t:'负转正 · 结算铁证',k:'good'}],
+  cash:{v:4780986.80, from:-406334.40, label:'账户资产快照（10/16 06:57 · 图25）', delta:'负 → 正', dk:'up'},
+  sh:{v:112800}, hold:6,
+  card:`<div class="card good"><div class="tb-cap">口径提示（防混淆）</div><table class="tb">
+  <tr><td>两快照之差（含股票市值）</td><td>5,187,321.20</td></tr>
+  <tr><td>真正现金流入</td><td>5,449,555.53</td></tr>
+  <tr class="total"><td>差 ¥262,234.33 ＝ 隔夜持仓市值波动，并非现金</td><td></td></tr>
+  </table></div>`,
+  narr:`<em>清晨 6 点 57 分</em>（图25）：账户资产 <em>¥4,780,986.80</em>，<u>由负转正</u>。两快照之差与现金流入相差的 ¥262,234.33 系隔夜持仓市值波动、并非现金——真正流入的现金就是 <em>¥5,449,555.53</em>。交割由中国结算自动终局完成——这是「<u>交易已结算</u>」的铁证。`,
+  dwell:11000},
+
+/*23*/
+{ ch:5, t:'勾稽验证 · 其一', title:'资金守恒 → 缺口自现', tone:'good',
+  badges:[{t:'勾稽 ①',k:'ver'}],
+  cash:{v:316210.06, from:0, label:'缺口（去向成谜 · 对方讳莫如深）'},
+  sh:{v:112800}, hold:6,
+  card: eq([
+    {n:'5,449,654.17', s:'能动用（可用资金）'}, {op:'−'},
+    {n:'5,133,444.11', s:'明处七笔买入'}, {op:'＝'},
+    {n:'316,210.06', s:'缺口 · 去向成谜', cls:'red'}
+  ], '对方在诉讼中对这 31.6 万只字不提'),
+  narr:`现在开始对账。能动用的钱 <em>¥5,449,654.17</em>，减去明处的七笔买入 <em>¥5,133,444.11</em>，还剩 <b>¥316,210.06</b>——这笔钱去了哪里？对方在诉讼中对此<u>只字不提</u>。`,
+  dwell:10000},
+
+/*24*/
+{ ch:5, t:'勾稽验证 · 其二', title:'缺口 ＝ 回购成本（差额 ¥0.00）', tone:'good',
+  badges:[{t:'勾稽 ② · 差额 ¥0.00',k:'ver'},{t:'指纹④',k:'fp'}],
+  cash:{v:316210.06, label:'暗中回购总成本'},
+  sh:{v:112800}, hold:6,
+  card: eq([
+    {n:'315,600.44', s:'回购股票本金'}, {op:'＋'},
+    {n:'252.48', s:'佣金'}, {op:'＋'},
+    {n:'357.14', s:'其他费'}, {op:'＝'},
+    {n:'316,210.06', s:'＝ 缺口 · 分毫相等', cls:'green'}
+  ], '回购 20,000 股 @ HK$17.336', '差额 ¥0.00 ✓ 分毫对应'),
+  narr:`把暗中回购的成本摆出来：本金 315,600.44 ＋ 佣金 252.48 ＋ 其他费 357.14 ＝ <em>¥316,210.06</em>，与缺口<em>分毫相等、差额 0.00 元</em>。缺口不是凭空消失，而是被拿去做了那笔<b>未经授权的回购</b>（指纹④）。`,
+  dwell:11000},
+
+/*25*/
+{ ch:5, t:'勾稽验证 · 其三', title:'股数维度互证 · 112,800 股', tone:'good',
+  badges:[{t:'勾稽 ③ · 股数互证',k:'ver'}],
+  cash:{v:112800, dec:0, cur:'', label:'交割单股份余额（02611 · 股）'},
+  sh:{v:112800}, hold:6,
+  card: eq([
+    {n:'0', s:'9:24 卖出归零'}, {op:'＋'},
+    {n:'20,000', s:'9:31 回购回填', cls:'red'}, {op:'＋'},
+    {n:'92,800', s:'9:35 客户买入'}, {op:'＝'},
+    {n:'112,800', s:'＝ 交割单股份余额', cls:'green'}
+  ], '', '与官方交割单完全一致 ✓'),
+  narr:`再从<u>股数维度</u>验证：9:24 卖出归零（0 股），9:31 暗中回购回填 <b>20,000 股</b>，9:35 客户买入 92,800 股，合计 <em>112,800 股</em>——与官方交割单的股份余额<em>完全一致</em>。资金、股数两个维度互相印证。`,
+  dwell:10000},
+
+/*26*/
+{ ch:5, t:'勾稽验证 · 其四', title:'三个「513万」与凭空的 ¥0.09', tone:'good',
+  badges:[{t:'勾稽 ④ · 凭空 0.09',k:'ver'},{t:'指纹③ 记账造假',k:'fp'}],
+  cash:{v:5133345.56, label:'对方诉请金额'},
+  sh:{v:112800}, hold:6,
+  card:`<div class="card"><div class="tb-cap">三个「513 万」同出一源（七笔合计 5,133,444.11）</div>
+  <table class="tb">
+  <tr><td>凌晨改扣款（02:28）</td><td>5,133,345.06</td></tr>
+  <tr><td>交割单末笔剩余</td><td>5,133,345.47</td></tr>
+  <tr class="now"><td>对方诉请金额</td><td>5,133,345.56</td></tr>
+  </table>
+  <div class="eq" style="margin-top:12px">
+    <span class="term" style="--i:0"><b>5,133,444.11</b><i>七笔合计</i></span><span class="op" style="--i:1">＋</span>
+    <span class="term red" style="--i:2"><b>0.09</b><i>「组合费」？</i></span><span class="op" style="--i:3">−</span>
+    <span class="term" style="--i:4"><b>98.64</b><i>余额</i></span><span class="op" style="--i:5">＝</span>
+    <span class="term" style="--i:6"><b>5,133,345.56</b><i>诉请（对方亲手公式）</i></span>
+  </div>
+  <div class="eqnote">真实组合费是 <b style="color:var(--cinnabar)">¥0.49</b>、开盘前已扣；官方交割单上<u>根本没有 0.09 这一笔</u>。</div>
+  <div class="sealrow"><span class="seal red">凭空多记 ¥0.09 · 自证造假</span></div></div>`,
+  narr:`全案出现三个「513 万」：凌晨改扣款 .06、交割单末笔 .47、对方诉请 .56——同出一源。对方诉请公式<u>亲手写入</u>「＋港股通组合费 <b>0.09</b>」；可真实组合费是 <em>0.49 元</em>且开盘前已扣，交割单上根本没有 0.09 这一笔。<b>凭空多记，自证记账造假</b>（指纹③）。`,
+  dwell:12000},
+
+/*27*/
+{ ch:5, t:'勾稽验证 · 其五', title:'双汇率口径互证 · 纯系汇差', tone:'good',
+  badges:[{t:'勾稽 ⑤ · 汇差自洽',k:'ver'}],
+  cash:{v:162840.00, from:0, label:'两口径差额（纯系汇差）'},
+  sh:{v:112800}, hold:6,
+  card: eq([
+    {n:'5,449,555.53', s:'结算汇率 0.90994 口径'}, {op:'−'},
+    {n:'5,286,715.53', s:'参考汇率 0.8828 口径'}, {op:'＝'},
+    {n:'162,840.00', s:'＝ HK$6,000,000 × (0.90994 − 0.8828)', cls:'green'}
+  ], '同一笔回款 · 两个口径 · 分毫自洽', '互证相符 ✓'),
+  narr:`最后以两个汇率口径互证：结算汇率口径 5,449,555.53 减参考汇率口径 5,286,715.53，差 <em>¥162,840.00</em>，恰等于 600 万港元 ×（0.90994 − 0.8828）。同一笔回款、两个口径，<em>分毫自洽</em>。`,
+  dwell:10000},
+
+/*28*/
+{ ch:5, t:'终局 · 全案闭环', title:'四枚指纹 · 取舍即自认 · 差额 ¥0.00', tone:'good',
+  badges:[{t:'终局 · 全案闭环',k:'good'}],
+  cash:{v:415.05, from:0, label:'交割终局 · 账户真实现金（物理终态）', note:'¥99.13 人民币 ＋ ¥315.92 港币残值（357.86 港元）'},
+  sh:{v:112800}, hold:6,
+  card:`<div class="card good"><div class="fp4">
+    <div class="fp"><b>指纹① 收费必有交易</b>印花税 ¥5,459.64 · 双向佣金 ¥19,894.30<span>印花税只对成交征收 → 交易已结算</span></div>
+    <div class="fp"><b>指纹② 两次扣款两次出错</b>12:17 与 02:28 · 深夜改账删痕<span>两种算法两个数 → 人手操作</span></div>
+    <div class="fp"><b>指纹③ 凭空 ¥0.09</b>真实组合费 ¥0.49 · 交割单无此笔<span>诉请公式亲手写入 → 自证造假</span></div>
+    <div class="fp"><b>指纹④ 缺口＝回购成本</b>¥316,210.06 分毫对应<span>未授权回购 20,000 股 @HK$17.336</span></div>
+  </div>
+  <div class="finline red">诉讼取舍即自认：只追 513 万（七笔买入） · 不追 546 万（卖出毛款） · 讳言 31.6 万（缺口）</div>
+  <div class="finline">回避全额、回避缺口 —— 恰恰自证「结算已成、盗资冲正」。</div>
+  <div class="sealrow"><span class="seal">算术逐项闭合 · 差额 ¥0.00 ✓</span></div></div>`,
+  narr:`交割终局后，账户真实现金仅剩 <b>¥415.05</b>——<u>账户被买到几近归零</u>。全案数据无一臆测，全部出自国泰海通<u>书面司法自认</u>与官方交割单；钱从哪来、到哪去、谁动了手脚，<em>算术逐项闭合、差额 0.00 元</em>。`,
+  dwell:15000},
+];
+
+/* ---------- 章节 ---------- */
+const CH = [['序幕',0],['一 · 钱从哪来',1],['二 · 钱到哪去',9],['三 · 深夜改账',17],['四 · 交割终局',20],['五 · 勾稽闭环',23]];
+
+/* ---------- 引擎 ---------- */
+let idx = 0, playing = false, spd = 1, ULTRA = true, tm = null;   /* 默认超慢：数字每 1 秒跳变一次 */
+let lastCash = null, lastShare = null;
+const UTICKS = 8;                                  /* 超慢模式：共 8 次跳变，每次间隔 1 秒 */
+const TW = () => RM ? 0 : (ULTRA ? UTICKS * 1000 : Math.round(3200 * spd));
+
+const chaptersEl = $('chapters');
+CH.forEach(([name, start], i) => {
+  const b = document.createElement('button');
+  b.textContent = name;
+  b.onclick = () => { goto(start); };
+  chaptersEl.appendChild(b);
+});
+
+function chapterOf(i){ let c = 0; CH.forEach(([_, s], k) => { if (i >= s) c = k; }); return c; }
+
+function show(i, fast){
+  idx = Math.max(0, Math.min(STEPS.length - 1, i));
+  const s = STEPS[idx];
+  $('stage').className = 'stage tone-' + (s.tone || 'normal');
+  $('stTime').textContent = s.t || '';
+  $('stTitle').innerHTML = s.title || '';
+  $('stBadges').innerHTML = (s.badges || []).map(b => `<span class="badge ${b.k}">${b.t}</span>`).join('');
+
+  /* 主数据格 */
+  const c = s.cash, cn = $('cashNum');
+  if (c){
+    const dec = (c.dec === undefined) ? 2 : c.dec;
+    const cur = (c.cur === undefined) ? '¥' : c.cur;
+    $('cashLabel').textContent = c.label || '';
+    const sameReg = lastCash && lastCash.cur === cur && lastCash.dec === dec;
+    let from = (c.from !== undefined) ? c.from : (sameReg ? lastCash.v : 0);
+    if (fast) from = c.v;
+    const txt = F(c.v, dec, cur);
+    cn.classList.toggle('long', txt.length > 11);
+    cn.classList.toggle('neg', c.v < 0);
+    cn.classList.toggle('pos', !!c.dk && c.dk === 'up' && c.v > 0);
+    cn.classList.toggle('struck', !!c.struck);
+    tween(cn, from, c.v, fast ? 700 : TW(), v => F(v, dec, cur));
+    lastCash = {v: c.v, cur, dec};
+    $('cashDelta').innerHTML = c.delta || '';
+    $('cashDelta').className = 'tdelta ' + (c.dk || '');
+    $('cashNote').textContent = c.note || '';
+  } else {
+    cn.className = 'tnum'; cn.textContent = '——';
+    $('cashLabel').textContent = '账户现金'; $('cashDelta').innerHTML = ''; $('cashNote').textContent = '';
+    lastCash = null;
+  }
+
+  /* 持股格 */
+  const sh = s.sh, sn = $('shareNum');
+  if (sh){
+    let from = (lastShare === null) ? 0 : lastShare;
+    if (fast) from = sh.v;
+    tween(sn, from, sh.v, fast ? 700 : TW(), v => Math.round(v).toLocaleString('zh-CN') + ' 股');
+    lastShare = sh.v;
+    $('shareDelta').innerHTML = sh.delta || '';
+    $('shareDelta').className = 'tdelta ' + (sh.dk || '');
+  } else { sn.textContent = '——'; $('shareDelta').innerHTML = ''; lastShare = null; }
+  $('holdings').innerHTML = (s.hold === undefined ? [] : HOLD[s.hold])
+    .map(h => `<span class="chip">${h[0]} ${h[1].toLocaleString('zh-CN')} 股</span>`).join('');
+
+  $('cardzone').innerHTML = s.card || '';
+  $('narr').innerHTML = s.narr || '';
+  $('stepCount').textContent = `第 ${idx + 1} 步 ／ 共 ${STEPS.length} 步`;
+  $('barFill').style.width = (idx / (STEPS.length - 1) * 100) + '%';
+  const cc = chapterOf(idx);
+  [...chaptersEl.children].forEach((b, k) => b.classList.toggle('on', k === cc));
+  $('btnPrev').disabled = (idx === 0);
+  $('btnNext').disabled = (idx === STEPS.length - 1);
+}
+
+function dwellOf(s){
+  const plain = (s.narr || '').replace(/<[^>]+>/g, '');
+  return (s.dwell || (5500 + plain.length * 45)) * spd;
+}
+
+function schedule(){
+  clearTimeout(tm);
+  if (!playing) return;
+  const s = STEPS[idx];
+  tm = setTimeout(() => {
+    if (idx < STEPS.length - 1){ show(idx + 1); schedule(); }
+    else { playing = false; updPlay(true); }
+  }, TW() + dwellOf(s));
+}
+
+function updPlay(ended){
+  const b = $('btnPlay');
+  if (playing) b.textContent = '⏸ 暂停';
+  else if (ended || idx === STEPS.length - 1) b.textContent = '▶ 从头重播';
+  else if (idx === 0) b.textContent = '▶ 开始播放';
+  else b.textContent = '▶ 继续播放';
+}
+
+$('btnPlay').onclick = () => {
+  if (playing){ playing = false; clearTimeout(tm); }
+  else {
+    if (idx === STEPS.length - 1){ show(0); }
+    playing = true; schedule();
+  }
+  updPlay();
+};
+$('btnPrev').onclick = () => goto(idx - 1);
+$('btnNext').onclick = () => goto(idx + 1);
+$('btnRestart').onclick = () => { show(0); if (playing) schedule(); updPlay(); window.scrollTo({top:0, behavior:'smooth'}); };
+$('btnFull').onclick = () => {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+};
+function goto(i){ clearTimeout(tm); show(i, true); if (playing) schedule(); updPlay(); }
+
+document.querySelectorAll('.speed button').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('.speed button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    ULTRA = (b.dataset.s === 'ultra');
+    spd = ULTRA ? 1 : parseFloat(b.dataset.s);
+    if (playing) schedule();
+  };
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goto(idx + 1);
+  else if (e.key === 'ArrowLeft') goto(idx - 1);
+  else if (e.key === ' '){ e.preventDefault(); $('btnPlay').onclick(); }
+});
+
+show(0);
+updPlay();
+</script>
+</body>
+</html>

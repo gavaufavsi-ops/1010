@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据铁环 · 立体闭环演示（2024.10.10 — 10.16）</title>
+<style>
+:root{
+  --paper:#f7f2e6;        /* 宣纸 */
+  --paper-line:#e3d9c2;
+  --ink:#211d18;          /* 墨 */
+  --ink-soft:#5a5142;
+  --cinnabar:#b5301f;     /* 朱砂 · 钱出 / 问题 */
+  --jade:#1b6e4a;         /* 翠绿 · 钱进 / 验证通过 */
+  --navy:#2c4a6e;         /* 靛青 · 官方记录 */
+  --gold:#a8771c;         /* 金 · 合龙之钥 */
+  --gold-bright:#d8a830;
+  --edge:#4a443a;
+  --serif:"Source Han Serif SC","Noto Serif SC","Songti SC","SimSun",serif;
+  --sans:"Source Han Sans SC","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --bw:148px; --bh:96px; --bd:26px; --R:280px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--sans);color:var(--ink);
+  background:
+    radial-gradient(1200px 600px at 50% -10%, #fffdf6 0%, transparent 60%),
+    repeating-linear-gradient(180deg, transparent 0 52px, var(--paper-line) 52px 53px),
+    var(--paper);
+  min-height:100%;
+  padding-bottom:170px;
+}
+
+/* ---------- 头部 ---------- */
+header{ text-align:center; padding:18px 14px 6px; }
+header h1{
+  font-family:var(--serif); font-weight:900;
+  font-size:clamp(24px, 4.4vw, 40px); letter-spacing:.06em;
+}
+header .sub{
+  margin-top:6px; color:var(--ink-soft);
+  font-size:clamp(13px, 1.9vw, 17px); letter-spacing:.04em;
+}
+nav#chapters{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0 4px}
+nav#chapters button{
+  font-family:var(--serif); font-size:clamp(14px,1.8vw,17px);
+  padding:.3em .9em; border:1.5px solid var(--edge); border-radius:999px;
+  background:#fdfaf2; color:var(--ink); cursor:pointer;
+}
+nav#chapters button.on{background:var(--navy);color:#fdfaf2}
+
+/* ---------- 舞台标题行 ---------- */
+.stagehead{ text-align:center; padding:6px 14px 0; min-height:3.2em; }
+.stagehead .stime{
+  display:inline-block; font-family:var(--serif); color:#fdfaf2; background:var(--ink);
+  padding:.15em .8em; border-radius:999px; font-size:clamp(13px,1.8vw,16px); letter-spacing:.08em;
+}
+.stagehead h2{
+  font-family:var(--serif); font-weight:900; margin-top:6px;
+  font-size:clamp(20px, 3.6vw, 32px); letter-spacing:.05em;
+}
+
+/* ---------- 三维场景 ---------- */
+#scene{
+  position:relative; margin:6px auto 0;
+  width:min(1060px, 96vw);
+  height:clamp(430px, 60vh, 600px);
+  overflow:hidden;
+}
+#dais{
+  position:absolute; left:50%; top:53%; width:72%; height:30%;
+  transform:translate(-50%,-50%) rotateX(0deg);
+  background:radial-gradient(closest-side, rgba(74,68,58,.16), rgba(74,68,58,.05) 62%, transparent 72%);
+  border-radius:50%;
+  pointer-events:none;
+}
+#ringWrap{
+  position:absolute; inset:0;
+  perspective:1500px; perspective-origin:50% 36%;
+}
+#ring{
+  position:absolute; left:50%; top:46%;
+  width:0; height:0;
+  transform-style:preserve-3d;
+}
+.slot{
+  position:absolute; left:0; top:0;
+  width:var(--bw); height:var(--bh);
+  margin-left:calc(var(--bw) / -2); margin-top:calc(var(--bh) / -2);
+  transform-style:preserve-3d;
+}
+
+/* 立方块（六面体） */
+.cub{ position:absolute; inset:0; transform-style:preserve-3d; }
+.face{
+  position:absolute; left:0; top:0; width:100%; height:100%;
+  border:2px solid var(--edge); border-radius:10px;
+  background:linear-gradient(170deg,#fbf7ec 0%, #efe7d2 100%);
+}
+.fF{ transform:translateZ(calc(var(--bd) / 2)); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:4px; }
+.fB{ transform:rotateY(180deg) translateZ(calc(var(--bd) / 2)); background:#e7ddc6; }
+.fL,.fR{
+  width:var(--bd); left:50%; margin-left:calc(var(--bd) / -2);
+  background:linear-gradient(180deg,#d9d0bb,#c4b89c);
+}
+.fL{ transform:rotateY(-90deg) translateZ(calc(var(--bw) / 2)); }
+.fR{ transform:rotateY( 90deg) translateZ(calc(var(--bw) / 2)); }
+.fT,.fBo{
+  height:var(--bd); top:50%; margin-top:calc(var(--bd) / -2);
+  background:linear-gradient(180deg,#efe7d2,#d4c9ad);
+}
+.fT { transform:rotateX( 90deg) translateZ(calc(var(--bh) / 2)); }
+.fBo{ transform:rotateX(-90deg) translateZ(calc(var(--bh) / 2)); }
+
+.bno{
+  font-family:var(--serif); font-weight:900;
+  font-size:clamp(13px, 1.6vw, 17px); color:var(--ink-soft); line-height:1;
+}
+.bname{
+  font-family:var(--serif); font-weight:900; line-height:1.15; text-align:center;
+  font-size:clamp(13px, 1.8vw, 18px); letter-spacing:.03em;
+}
+.bval{
+  font-weight:900; line-height:1.05; white-space:nowrap;
+  font-size:clamp(14px, 2vw, 21px); font-variant-numeric:tabular-nums;
+}
+.t-jade .bval{color:var(--jade)} .t-red .bval{color:var(--cinnabar)}
+.t-navy .bval{color:var(--navy)} .t-ink .bval{color:var(--ink)}
+.t-gold .fF{background:linear-gradient(170deg,#fff6dc,#f3e1ad); border-color:var(--gold)}
+.t-gold .bval{color:var(--gold)}
+.t-red.warn .fF::after{
+  content:"未授权"; position:absolute; top:-9px; right:-8px;
+  background:var(--cinnabar); color:#fff; font-size:11px; letter-spacing:.1em;
+  padding:2px 7px; border-radius:999px; transform:rotate(8deg);
+}
+
+/* 已验证归位 */
+.cub.ver .fF{
+  border-color:var(--jade);
+  box-shadow:0 0 0 3px rgba(27,110,74,.45), 0 0 22px rgba(27,110,74,.45);
+}
+.cub.ver .fF::before{
+  content:"✓"; position:absolute; top:-11px; left:-9px;
+  width:24px; height:24px; border-radius:50%;
+  background:var(--jade); color:#fff; font-weight:900; font-size:15px;
+  display:grid; place-items:center;
+}
+.cub.gver .fF{
+  border-color:var(--gold);
+  box-shadow:0 0 0 3px rgba(216,168,48,.6), 0 0 28px rgba(216,168,48,.65);
+}
+@keyframes landPop{ 0%{transform:scale(1.25)} 60%{transform:scale(.96)} 100%{transform:scale(1)} }
+.cub.pop{ animation:landPop .55s ease-out; }
+
+/* 空位虚框 */
+.ghost{
+  position:absolute; inset:0; display:none;
+  border:2.5px dashed #b9ad92; border-radius:10px;
+  color:#b9ad92; font-family:var(--serif); font-weight:900;
+  font-size:clamp(16px,2vw,22px);
+  align-items:center; justify-content:center;
+}
+.slot.out .ghost{display:flex}
+.slot.out .cub{display:none}
+
+/* 金环脉动 */
+#ring.gold .cub .fF{ animation:goldGlow 2.4s ease-in-out infinite; }
+@keyframes goldGlow{
+  0%,100%{ box-shadow:0 0 0 3px rgba(27,110,74,.45), 0 0 18px rgba(27,110,74,.4); }
+  50%   { box-shadow:0 0 0 3px rgba(216,168,48,.75), 0 0 34px rgba(216,168,48,.8); }
+}
+
+/* ---------- 飞行卡（脱环之后） ---------- */
+#fx{ position:absolute; inset:0; pointer-events:none; }
+.fly{
+  position:absolute; left:0; top:0;
+  width:var(--bw); height:var(--bh);
+  will-change:transform;
+}
+.fly .persp{ position:absolute; inset:0; perspective:950px; }
+.fly .cub{ position:absolute; inset:0; }
+.fly.swing .cub{ animation:sway 5.6s ease-in-out infinite alternate; }
+@keyframes sway{
+  0%  { transform:rotateY(-10deg) rotateX(5deg); }
+  100%{ transform:rotateY( 10deg) rotateX(-4deg); }
+}
+.ftag{
+  position:absolute; top:calc(100% + 10px); left:50%; transform:translateX(-50%);
+  white-space:nowrap; pointer-events:none;
+  background:rgba(33,29,24,.92); color:#f7f2e6;
+  padding:.3em .8em; border-radius:999px;
+  font-size:clamp(12px, 1.5vw, 15px); letter-spacing:.03em;
+  font-variant-numeric:tabular-nums;
+}
+.fly.center .ftag{ font-size:clamp(13px,1.7vw,16px); top:calc(100% + 16px); }
+
+/* ---------- 聚光说明（取出某块时） ---------- */
+#cap{
+  position:absolute; left:50%; bottom:8px; transform:translateX(-50%);
+  width:min(860px, 94%);
+  background:rgba(253,250,242,.94);
+  border:2px solid var(--edge); border-radius:14px;
+  padding:10px 16px 12px; text-align:center;
+  display:none;
+}
+#cap.onshow{display:block}
+#cap .cline{ display:flex; align-items:baseline; justify-content:center; gap:10px; flex-wrap:wrap; }
+#cap .cname{
+  font-family:var(--serif); font-weight:900;
+  font-size:clamp(20px, 3.4vw, 30px); letter-spacing:.05em;
+}
+#cap .csrc{
+  font-size:clamp(12px, 1.7vw, 15px); padding:.15em .7em; border-radius:999px;
+  border:1.5px solid; letter-spacing:.06em; white-space:nowrap;
+}
+.src-zr{color:var(--cinnabar); border-color:var(--cinnabar)}
+.src-jg{color:var(--navy); border-color:var(--navy)}
+.src-sx{color:var(--jade); border-color:var(--jade)}
+.src-key{color:var(--gold); border-color:var(--gold)}
+#cap .cnote{
+  margin-top:6px; color:var(--ink-soft); line-height:1.55;
+  font-size:clamp(15px, 2.1vw, 19px);
+}
+
+/* ---------- 验算板 ---------- */
+#board{
+  position:absolute; left:50%; bottom:8px; transform:translateX(-50%);
+  width:min(940px, 96%);
+  background:rgba(253,250,242,.95);
+  border:2.5px solid var(--edge); border-radius:16px;
+  padding:12px 14px 12px; text-align:center;
+  display:none;
+}
+#board.onshow{display:block}
+#board .bt{
+  font-family:var(--serif); font-weight:900; letter-spacing:.08em;
+  font-size:clamp(17px, 2.6vw, 24px); margin-bottom:8px;
+}
+#board .row{
+  display:flex; align-items:stretch; justify-content:center;
+  gap:clamp(4px, 1vw, 12px); flex-wrap:wrap;
+}
+.chip{
+  border:2px solid var(--edge); border-radius:12px; background:#fbf7ec;
+  padding:6px 12px; min-width:120px;
+}
+.chip .cn{ font-size:clamp(12px,1.7vw,15px); color:var(--ink-soft); letter-spacing:.04em; }
+.chip .cv{
+  font-weight:900; font-variant-numeric:tabular-nums; white-space:nowrap;
+  font-size:clamp(20px, 3.4vw, 34px); line-height:1.15;
+}
+.chip.res{ border-color:var(--jade); background:#eef6ef; }
+.chip.res .cv{ color:var(--jade); }
+.chip.gold{ border-color:var(--gold); background:#fdf6e0; }
+.chip.gold .cv{ color:var(--gold); }
+.op{
+  align-self:center; font-weight:900; color:var(--ink-soft);
+  font-size:clamp(24px, 4vw, 40px); padding:0 2px;
+}
+.okstamp{
+  align-self:center; font-family:var(--serif); font-weight:900;
+  color:var(--jade); border:3px solid var(--jade); border-radius:10px;
+  padding:.1em .5em; transform:rotate(-7deg) scale(0);
+  font-size:clamp(17px, 2.6vw, 26px); letter-spacing:.12em;
+  transition:transform .45s cubic-bezier(.2,1.6,.4,1);
+}
+.okstamp.on{ transform:rotate(-7deg) scale(1); }
+#board .bsay{
+  margin-top:8px; line-height:1.6; color:var(--ink);
+  font-size:clamp(15px, 2.2vw, 20px);
+}
+
+/* 终局印章与小结 */
+.sealwrap{ display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; margin-top:4px; }
+.seal{
+  font-family:var(--serif); font-weight:900; color:var(--cinnabar);
+  border:4px solid var(--cinnabar); border-radius:12px;
+  padding:.18em .55em; letter-spacing:.14em;
+  font-size:clamp(22px, 3.6vw, 34px);
+  transform:rotate(-8deg) scale(0); transition:transform .6s cubic-bezier(.2,1.6,.4,1);
+  background:rgba(181,48,31,.06);
+}
+.seal.on{ transform:rotate(-8deg) scale(1); }
+.finlines{ text-align:left; max-width:560px; margin:0 auto; font-size:clamp(14px,2vw,18px); line-height:1.7; color:var(--ink); }
+.finlines b{color:var(--cinnabar)}
+.finlines em{font-style:normal; color:var(--jade); font-weight:900}
+
+/* ---------- 旁白 ---------- */
+#narrwrap{ width:min(1000px, 94vw); margin:14px auto 0; }
+#narr{
+  background:#fdfaf2; border:2px solid var(--edge); border-radius:14px;
+  padding:14px 18px; line-height:1.75;
+  font-size:clamp(17px, 2.5vw, 23px);
+}
+#narr b{color:var(--cinnabar)} #narr em{font-style:normal;color:var(--jade);font-weight:900}
+.source{
+  margin:10px auto 0; width:min(1000px,94vw); color:var(--ink-soft);
+  font-size:clamp(12px,1.7vw,14px); line-height:1.6; text-align:center;
+}
+
+/* ---------- 控制台 ---------- */
+footer.ctrl{
+  position:fixed; left:0; right:0; bottom:0; z-index:60;
+  background:rgba(247,242,230,.97);
+  border-top:2px solid var(--edge);
+  box-shadow:0 -6px 20px rgba(33,29,24,.12);
+}
+footer .inner{ width:min(1000px,96vw); margin:0 auto; padding:10px 8px 12px; }
+footer .row{ display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; }
+footer button{
+  font-family:var(--sans); font-weight:700; cursor:pointer;
+  border:2px solid var(--edge); border-radius:12px; background:#fdfaf2; color:var(--ink);
+  min-height:52px; padding:.35em 1.1em; font-size:clamp(16px,2.2vw,20px);
+}
+footer button.primary{ background:var(--ink); color:#fdfaf2; min-width:9.5em; }
+footer button:disabled{ opacity:.35; cursor:default; }
+footer .meta{ margin-top:8px; gap:8px; font-size:1rem; color:var(--ink-soft); }
+.speed button{min-height:42px;padding:.25em .8em;font-size:1rem}
+.speed button.on{background:#f4eddc;color:var(--ink)}
+.count{font-variant-numeric:tabular-nums}
+.bar{ height:8px; background:#e8e0cc; border-radius:99px; margin-top:8px; overflow:hidden; }
+#barFill{ height:100%; width:0; background:linear-gradient(90deg,var(--navy),var(--jade)); transition:width .5s ease; }
+
+@media (prefers-reduced-motion: reduce){
+  .fly.swing .cub{animation:none}
+  #ring.gold .cub .fF{animation:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>数据铁环 · 立体闭环演示</h1>
+  <div class="sub">粤01民终16331 · 十块数据出环亮相，逐笔验算，逐块归位 —— 真账如铁环，造假合不拢</div>
+</header>
+
+<nav id="chapters"></nav>
+
+<div class="stagehead">
+  <span class="stime" id="stTime"></span>
+  <h2 id="stTitle"></h2>
+</div>
+
+<div id="scene">
+  <div id="dais"></div>
+  <div id="ringWrap"><div id="ring"></div></div>
+  <div id="fx"></div>
+
+  <div id="cap">
+    <div class="cline">
+      <span class="cname" id="capName"></span>
+      <span class="csrc" id="capSrc"></span>
+    </div>
+    <div class="cnote" id="capNote"></div>
+  </div>
+
+  <div id="board">
+    <div class="bt" id="bdTitle"></div>
+    <div class="row" id="bdRow"></div>
+    <div class="bsay" id="bdSay"></div>
+  </div>
+</div>
+
+<div id="narrwrap"><div id="narr"></div></div>
+
+<div class="source">
+  数据出处：国泰海通《代理意见》（2025-05-26 庭审）与《起诉状》之书面司法自认 · 官方交割单 · 中国结算 T+2 交收记录。<br>
+  本演示仅作数据呈现，十块数据全部可逐项核对，无一出自我方臆测。
+</div>
+
+<footer class="ctrl">
+  <div class="inner">
+    <div class="row">
+      <button id="btnPrev">⏮ 上一步</button>
+      <button id="btnPlay" class="primary">▶ 开始播放</button>
+      <button id="btnNext">下一步 ⏭</button>
+    </div>
+    <div class="row meta">
+      <span class="speed">速度
+        <button data-s="ultra" class="on">超慢·每秒一变</button><button data-s="1">慢速</button><button data-s="0.55">中速</button>
+      </span>
+      <span class="count" id="stepCount"></span>
+      <button id="btnRestart" style="min-height:42px;padding:.25em .8em;font-size:1rem">⟲ 重播</button>
+      <button id="btnFull" style="min-height:42px;padding:.25em .8em;font-size:1rem">⛶ 全屏</button>
+    </div>
+    <div class="bar"><div id="barFill"></div></div>
+  </div>
+</footer>
+
+<script>
+"use strict";
+/* ================= 工具 ================= */
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = id => document.getElementById(id);
+const F = (v, d=2, c='¥') =>
+  (v<0?'−':'') + c + Math.abs(v).toLocaleString('zh-CN',{minimumFractionDigits:d,maximumFractionDigits:d});
+
+let ULTRA = true;                                   /* 默认超慢：数字每 1 秒跳变一次 */
+let spd = 1;
+const UTICKS = 8;                                   /* 超慢：8 次跳变，每次间隔 1 秒 */
+const TW = () => RM ? 0 : (ULTRA ? UTICKS * 1000 : Math.round(3200 * spd));
+
+function tween(el, from, to, dur, render){
+  if (el._raf) cancelAnimationFrame(el._raf);
+  if (RM || dur<=0 || from===to){ el.textContent = render(to); return; }
+  const t0 = performance.now();
+  const stepMode = ULTRA && dur > 1500;             /* 超慢：数字整秒跳变 */
+  const fr = t => {
+    let p = Math.min(1, (t - t0) / dur);
+    let v;
+    if (stepMode){
+      p = Math.min(1, Math.floor((t - t0) / 1000) * 1000 / dur);   /* 每满 1 秒变一次 */
+      v = from + (to - from) * p;                                   /* 等额递进，便于逐秒跟读 */
+    } else {
+      const e = p<.5 ? 4*p*p*p : 1 - Math.pow(-2*p+2,3)/2;
+      v = from + (to - from) * e;
+    }
+    el.textContent = render(v);
+    if (p < 1) el._raf = requestAnimationFrame(fr);
+  };
+  el._raf = requestAnimationFrame(fr);
+}
+
+/* ================= 数据 ================= */
+const BLOCKS = [
+  {id:1,  name:'期初现金',  v:99.13,       tone:'t-ink',  src:'对方自认', sk:'src-zr',
+   note:'2024年10月10日开盘之前，账户里全部的钱。券商在《代理意见》中白纸黑字自认。'},
+  {id:2,  name:'组合费',    v:0.49,        tone:'t-red',  src:'对方自认', sk:'src-zr',
+   note:'当天系统真实扣收的组合费：4角9分。是 0.49 元——不是凭空冒出的"0.09 元"。'},
+  {id:3,  name:'开盘前余额',v:98.64,       tone:'t-ink',  src:'对方自认', sk:'src-zr',
+   note:'99.13 − 0.49 ＝ 98.64。开盘前账户真实余额，券商书面自认。'},
+  {id:4,  name:'卖出毛款',  v:5459640.00,  tone:'t-jade', src:'官方交割单', sk:'src-jg',
+   note:'9:20:39 两万股 × HK$300 场外成交得 600 万港币；按官方结算汇率 0.90994 折合人民币。'},
+  {id:5,  name:'六项费用',  v:10084.47,    tone:'t-red',  src:'官方交割单', sk:'src-jg',
+   note:'印花5,459.64＋佣金4,069.77＋经手308.47＋证管147.41＋清算90.99＋其他8.19。收费必有交易（指纹①）。'},
+  {id:6,  name:'净回款',    v:5449555.53,  tone:'t-jade', src:'官方交割单', sk:'src-jg',
+   note:'毛款减六费。10月16日凌晨由中国结算 T+2 自动入账——客户没有存入一分钱。'},
+  {id:7,  name:'可用资金',  v:5449654.17,  tone:'t-navy', src:'数学推定', sk:'src-sx',
+   note:'老本 98.64 ＋ 净回款 5,449,555.53。这是账户全部可以动用的钱。'},
+  {id:8,  name:'七笔买入',  v:5133444.11,  tone:'t-red',  src:'官方交割单', sk:'src-jg',
+   note:'9:35–9:38 连下七笔买入，交割单逐笔可查，剩余金额自 98.64 起逐笔轧减。'},
+  {id:9,  name:'暗中回购',  v:316210.06,   tone:'t-red',  src:'官方交割单', sk:'src-jg', warn:true,
+   note:'9:31 无任何委托授权：20,000股 × HK$17.336。本金315,600.44＋佣金252.48＋其他357.14。诉状对此绝口不提。'},
+  {id:10, name:'差额',      v:0.00,        tone:'t-gold', src:'闭环之钥', sk:'src-key',
+   note:'可用资金 − 七笔买入 − 回购成本 ＝ ？这块金钥匙最后归位：若等于 0.00，铁环完美合龙。'}
+];
+
+const RET = [[1,2,3],[4],[5,6],[7],[8,9],[10]];     /* 六道验算各自归位的块 */
+
+const EQ = [
+  {t:'验一 · 进门小账',
+   a:{n:'期初现金', v:99.13},          op:'−', b:{n:'组合费', v:0.49, d:2},
+   r:{n:'开盘前余额', v:98.64},
+   say:'兜里 99 块 1 毛 3，扣 4 毛 9 组合费，剩 98 块 6 毛 4 —— 一分不差，三块归位。'},
+  {t:'验二 · 卖出折算',
+   a:{n:'卖出价款', v:6000000, c:'HK$'}, op:'×', b:{n:'结算汇率', v:0.90994, c:'', d:5},
+   r:{n:'卖出毛款', v:5459640.00},
+   say:'600 万港币按官方结算汇率折算，恰是 545 万 9,640 元整 —— 第④块归位。'},
+  {t:'验三 · 费后净款',
+   a:{n:'卖出毛款', v:5459640.00},     op:'−', b:{n:'六项费用', v:10084.47},
+   r:{n:'净回款', v:5449555.53},
+   say:'印花税、佣金等六笔费用交割单照单全收。收了费，就有过交易（指纹①）。两块归位。'},
+  {t:'验四 · 可用合计',
+   a:{n:'开盘前余额', v:98.64},        op:'＋', b:{n:'净回款', v:5449555.53},
+   r:{n:'可用资金', v:5449654.17},
+   say:'老本加卖股净款，就是账户里全部可用的钱 —— 第⑦块归位。'},
+  {t:'验五 · 钱的去向',
+   a:{n:'可用资金', v:5449654.17},     op:'−', b:{n:'七笔买入', v:5133444.11},
+   r:{n:'应余资金', v:316210.06},
+   say:'七笔买入花掉 513 万后，应当剩下 31 万 6,210 元 0 6 分。这笔钱去哪了？两块归位。'},
+  {t:'验六 · 完美合龙',
+   a:{n:'应余资金', v:316210.06},      op:'−', b:{n:'暗中回购成本', v:316210.06},
+   r:{n:'差额', v:0.00, gold:true},
+   say:'应余的钱与暗中回购花掉的钱<b>分毫相等</b>，差额 <em>¥0.00</em>（指纹④）。金钥归位，铁环合龙。'}
+];
+
+const STEPS = [
+  {ti:'十块数据 · 一只铁环', tm:'2024.10.10 — 10.16',
+   narr:'券商自认与官方交割单上的<b>十个关键数字</b>，铸成这只缓缓转动的资金铁环。下面把每一块依次<b>取出来亮给您看</b>，再<em>逐笔验算、逐块放回</em>。真账如铁环——若有半分造假，环必合不拢。', dwell:9000},
+];
+BLOCKS.forEach((b,i)=>{
+  const CN='①②③④⑤⑥⑦⑧⑨⑩'[i];
+  STEPS.push({ti:`取出第${CN}块 · ${b.name}`, tm:'出环亮相', out:b.id, narr:null, dwell:6200 + b.note.length*34, extra:2100});
+});
+const NARRV=[
+ '第一道小账当面验清：①减②正好等于③。三块数据验讫，飞回环上各归各位，<em>绿灯亮起</em>。',
+ '港币换人民币用的是<b>官方结算汇率 0.90994</b>，不是估算价。第④块验讫归位。',
+ '六笔费用交割单照单全收——<b>收费必有交易</b>，这是抵赖不掉的指纹①。⑤⑥两块归位。',
+ '账户里可动用的每一分钱都有来历：98.64 是老本，545 万是卖股净款。第⑦块归位。',
+ '减完七笔买入，账上<b>应当剩 ¥316,210.06</b>。请记住这个数——它就是本案的"数据指纹"。⑧⑨两块归位。',
+ '应余的钱与<b>暗中回购花掉的钱</b>分毫相等，差额 <em>¥0.00</em>（指纹④）。金钥匙合龙，铁环闭合——十个数字，全部出自券商之手。'
+];
+EQ.forEach((q,v)=>{
+  STEPS.push({ti:q.t, tm:'验证 · 飞回归位', eq:v,
+    narr:NARRV[v], dwell:8200, extra:1500 + RET[v].length*950});
+});
+STEPS.push({ti:'完美闭环 · 铁证如山', tm:'终局', fin:true,
+  narr:'资金闭环：差额 <em>¥0.00</em>。股数闭环：0＋20,000＋92,800＝<em>112,800 股</em>，与交割单完全一致。三个"513万"同出一源；<b>¥0.09 凭空记账</b>（指纹③）；<b>深夜两次改扣、抹除记录</b>（指纹②）。环已合龙，铁案如山。', dwell:15000, extra:1200});
+
+const CH = [['序幕',0],['出环 · 亮数据',1],['验证 · 飞回闭环',11],['终局 · 合龙',17]];
+
+/* ================= 场景搭建 ================= */
+const scene=$('scene'), fx=$('fx'), ring=$('ring');
+const N = BLOCKS.length;
+const slots={}, cubs={}, ghosts={}, flies={};
+let SW=0, SH=0, BW=148, BH=96, SPOTS=[];
+
+function cubHTML(b){
+  const CN='①②③④⑤⑥⑦⑧⑨⑩'[b.id-1];
+  return `
+    <div class="face fB"></div>
+    <div class="face fL"></div><div class="face fR"></div>
+    <div class="face fT"></div><div class="face fBo"></div>
+    <div class="face fF">
+      <div class="bno">${CN}</div>
+      <div class="bname">${b.name}</div>
+      <div class="bval">${F(b.v)}</div>
+    </div>`;
+}
+BLOCKS.forEach((b,i)=>{
+  const s=document.createElement('div');
+  s.className='slot'; s.style.setProperty('--a',(i*360/N)+'deg');
+  s.innerHTML=`<div class="ghost">${'①②③④⑤⑥⑦⑧⑨⑩'[i]}</div>
+               <div class="cub ${b.tone}${b.warn?' warn':''}" id="cub${b.id}">${cubHTML(b)}</div>`;
+  ring.appendChild(s);
+  slots[b.id]=s; cubs[b.id]=s.querySelector('.cub'); ghosts[b.id]=s.querySelector('.ghost');
+});
+
+function layout(){
+  const r=scene.getBoundingClientRect(); SW=r.width; SH=r.height;
+  BW = Math.max(94, Math.min(150, SW*0.155));
+  BH = Math.round(BW*0.66);
+  const BD = Math.round(BW*0.18);
+  /* 半径：既保证相邻块不重叠，又保证整环横向不出画 */
+  const R = Math.max(BW*1.18,
+            Math.min(SW*0.5 - BW*0.62, Math.max(BW*1.4, Math.min(SW*0.30, SH*0.50))));
+  const root=document.documentElement.style;
+  root.setProperty('--bw',BW+'px'); root.setProperty('--bh',BH+'px');
+  root.setProperty('--bd',BD+'px'); root.setProperty('--R', R+'px');
+  Object.values(slots).forEach(s=>{
+    s.style.transform=`rotateY(var(--a)) translateZ(${R}px)`;
+  });
+  /* 停泊位：环上方两排各 5 个，居中排布 */
+  SPOTS=[];
+  const pw=BW*0.72, gap=Math.max(4, SW*0.012);
+  const total=pw*5+gap*4, x0=SW/2-total/2+pw/2;
+  const y1=SH*0.075, y2=y1 + BH*0.72 + 36;
+  for(let k=0;k<5;k++) SPOTS.push({x:x0+k*(pw+gap), y:y1});
+  for(let k=0;k<5;k++) SPOTS.push({x:x0+k*(pw+gap), y:y2});
+}
+
+/* 环自转 */
+let spin = -8;
+function applySpin(){ ring.style.transform = `rotateX(-11deg) rotateY(${spin}deg)`; }
+
+/* ================= 飞行卡 ================= */
+function setT(o){ o.el.style.transform =
+  `translate(${o.x}px, ${o.y}px) translate(-50%,-50%) scale(${o.s})`; }
+
+function makeFly(id){
+  if (flies[id]) return flies[id];
+  const b=BLOCKS[id-1], CN='①②③④⑤⑥⑦⑧⑨⑩'[id-1];
+  const el=document.createElement('div');
+  el.className='fly';
+  el.innerHTML=`<div class="persp"><div class="cub ${b.tone}${b.warn?' warn':''}">${cubHTML(b)}</div></div>
+                <div class="ftag">${CN} ${b.name}　${F(b.v)}</div>`;
+  fx.appendChild(el);
+  const o={el, x:SW/2, y:SH/2, s:1, mode:'css'};
+  flies[id]=o; return o;
+}
+function killFly(id){ const o=flies[id]; if(o){o.el.remove(); delete flies[id];} }
+
+function fxPos(rect){
+  const fr=fx.getBoundingClientRect();
+  return {x:rect.left+rect.width/2-fr.left, y:rect.top+rect.height/2-fr.top, s:Math.max(.2,rect.width/BW)};
+}
+function slotOut(id, out){ slots[id].classList.toggle('out', out); }
+function centerPos(){ return {x:SW/2, y:SH*0.40, s:Math.min(2.7, (SW*0.78)/BW)}; }
+function parkPos(id){ const p=SPOTS[id-1]; return {x:p.x, y:p.y, s:0.72}; }
+
+function placeFly(id, pos, instant, ms){
+  const o=makeFly(id);
+  o.el.style.transition = instant ? 'none' : `transform ${ms||1400}ms cubic-bezier(.22,.82,.24,1)`;
+  Object.assign(o,pos); setT(o);
+}
+
+/* 出环：FLIP 起飞 → 中央聚光 */
+function flyOut(id){
+  const start = fxPos(cubs[id].getBoundingClientRect());
+  slotOut(id, true);
+  placeFly(id, start, true);
+  flies[id].el.classList.add('swing','center');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    placeFly(id, centerPos(), false, RM?0:1500);
+  }));
+}
+/* 收入停泊位 */
+function parkFly(id, instant){
+  if(!flies[id]) { slotOut(id,true); placeFly(id, parkPos(id), true); }
+  const o=flies[id];
+  o.el.classList.remove('swing','center');
+  placeFly(id, parkPos(id), instant, 1100);
+}
+/* 归位：追踪空位、飞回、落定亮绿 */
+const HOMING={};
+function flyBack(id, gold){
+  if(!flies[id]){ landAt(id, gold); return; }
+  const o=flies[id];
+  o.el.style.transition='none';
+  o.el.classList.remove('swing','center');
+  HOMING[id]={gold};
+}
+function landAt(id, gold){
+  delete HOMING[id]; killFly(id);
+  slotOut(id, false);
+  const c=cubs[id];
+  c.classList.add(gold?'gver':'ver','pop');
+  setTimeout(()=>c.classList.remove('pop'), 650);
+}
+
+/* 主循环：自转 + 归位追踪 */
+let lastT=performance.now();
+function loop(t){
+  const dt=Math.min(50, t-lastT); lastT=t;
+  if(!RM){ spin += dt*0.0072; applySpin(); }       /* 约 50 秒一周 */
+  for(const id of Object.keys(HOMING)){
+    const o=flies[id], g=ghosts[id];
+    const tp=fxPos(g.getBoundingClientRect());
+    o.x += (tp.x-o.x)*0.085; o.y += (tp.y-o.y)*0.085; o.s += (tp.s-o.s)*0.085;
+    setT(o);
+    if(Math.abs(tp.x-o.x)<7 && Math.abs(tp.y-o.y)<7 && Math.abs(tp.s-o.s)<.04)
+      landAt(id, HOMING[id].gold);
+  }
+  requestAnimationFrame(loop);
+}
+
+/* ================= 说明区 / 验算板 ================= */
+function showCap(b){
+  $('capName').textContent = b.name;
+  const sb=$('capSrc'); sb.textContent=b.src; sb.className='csrc '+b.sk;
+  $('capNote').textContent = b.note;
+  $('cap').classList.add('onshow'); $('board').classList.remove('onshow');
+}
+function chipHTML(o, cls){
+  return `<div class="chip ${cls||''}"><div class="cn">${o.n}</div><div class="cv">——</div></div>`;
+}
+function showBoard(v, animate){
+  const q=EQ[v];
+  $('bdTitle').textContent=q.t;
+  $('bdRow').innerHTML =
+    chipHTML(q.a) + `<div class="op">${q.op}</div>` + chipHTML(q.b) +
+    `<div class="op">＝</div>` + chipHTML(q.r, q.r.gold?'res gold':'res') +
+    `<div class="okstamp" id="okst">✓ 相符</div>`;
+  $('bdSay').innerHTML=q.say;
+  $('board').classList.add('onshow'); $('cap').classList.remove('onshow');
+  const cvs=$('bdRow').querySelectorAll('.cv');
+  const dat=[q.a,q.b,q.r];
+  cvs.forEach((el,k)=>{
+    const d=dat[k], cur=(d.c!==undefined)?d.c:'¥', dec=(d.d!==undefined)?d.d:2;
+    if(animate) tween(el, 0, d.v, TW(), x=>F(x,dec,cur));
+    else el.textContent=F(d.v,dec,cur);
+  });
+  const st=$('okst');
+  if(animate) SEQ.push(setTimeout(()=>st.classList.add('on'), TW()+450));
+  else st.classList.add('on');
+}
+function showFinale(animate){
+  $('bdTitle').textContent='十块归位 · 分毫不差';
+  $('bdRow').innerHTML =
+    `<div class="sealwrap"><div class="seal" id="finSeal">勾稽相符 · 分毫不差</div>
+     <div class="finlines">
+       资金闭环：差额 <em>¥0.00</em>（指纹④）<br>
+       股数闭环：0＋20,000＋92,800＝<em>112,800 股</em> ✓<br>
+       三个"513万"同出一源 ✓ ／ <b>¥0.09 凭空记账</b>（指纹③）<br>
+       <b>12:17 错扣 599 万 → 次日 02:28 改扣 → 02:34 删记录</b>（指纹②）
+     </div></div>`;
+  $('bdSay').innerHTML='十个数字，没有一个出自我方——<em>全部来自券商自认与官方交割单</em>。环既合龙，账即铁案。';
+  $('board').classList.add('onshow'); $('cap').classList.remove('onshow');
+  const sl=$('finSeal');
+  if(animate) SEQ.push(setTimeout(()=>sl.classList.add('on'), 900));
+  else sl.classList.add('on');
+}
+function hideBoards(){ $('cap').classList.remove('onshow'); $('board').classList.remove('onshow'); }
+
+/* ================= 状态机 ================= */
+function stateFor(i){
+  const all=BLOCKS.map(b=>b.id);
+  if(i===0) return {ring:all, ver:[], park:[], spot:null, eq:null, fin:false};
+  if(i<=10){
+    return {ring:all.slice(i), ver:[], park:all.slice(0,i-1), spot:i, eq:null, fin:false};
+  }
+  if(i<=16){
+    const v=i-11, ver=RET.slice(0,v+1).flat();
+    return {ring:ver.slice(), ver, park:all.filter(x=>!ver.includes(x)), spot:null, eq:v, fin:false};
+  }
+  return {ring:all, ver:all, park:[], spot:null, eq:null, fin:true};
+}
+
+let SEQ=[];
+function clearSeq(){ SEQ.forEach(clearTimeout); SEQ=[]; }
+const seqT=(fn,ms)=>SEQ.push(setTimeout(fn,ms));
+
+function snapTo(st){
+  for(const id in HOMING) delete HOMING[id];
+  BLOCKS.forEach(b=>{
+    const id=b.id;
+    const inRing = st.ring.includes(id);
+    if(inRing){
+      killFly(id); slotOut(id,false);
+      cubs[id].classList.toggle('ver', st.ver.includes(id) && id!==10);
+      cubs[id].classList.toggle('gver', st.ver.includes(id) && id===10);
+    } else {
+      slotOut(id,true);
+      cubs[id].classList.remove('ver','gver');
+      if(st.spot===id){
+        placeFly(id, centerPos(), true);
+        flies[id].el.classList.add('center'); if(!RM) flies[id].el.classList.add('swing');
+      } else {
+        placeFly(id, parkPos(id), true);
+        flies[id].el.classList.remove('swing','center');
+      }
+    }
+  });
+  ring.classList.toggle('gold', st.fin);
+  if(st.spot){ showCap(BLOCKS[st.spot-1]); }
+  else if(st.eq!==null && st.eq!==undefined){ showBoard(st.eq, false); }
+  else if(st.fin){ showFinale(false); }
+  else hideBoards();
+}
+
+let idx=0, playing=false, tm=null;
+
+function show(i, fast){
+  clearSeq(); clearTimeout(tm);
+  i=Math.max(0, Math.min(STEPS.length-1, i));
+  const sequential = (!fast && i===idx+1 && !RM);
+  const fromIdx=idx; idx=i;
+  const s=STEPS[i], st=stateFor(i);
+
+  if(!sequential){
+    snapTo(st);
+  } else {
+    /* 顺序前进：编排动画 */
+    if(s.out){                                    /* 出环步 */
+      hideBoards();
+      const prev=stateFor(fromIdx);
+      if(prev.spot) parkFly(prev.spot,false);     /* 上一块入停泊位 */
+      seqT(()=>{ flyOut(s.out); }, prev.spot?320:80);
+      const b=BLOCKS[s.out-1];
+      seqT(()=>{
+        showCap(b);
+        const bv=flies[s.out].el.querySelector('.bval');
+        tween(bv, 0, b.v, TW(), x=>F(x));
+      }, 1750);
+    } else if(s.eq!==undefined && s.eq!==null){   /* 验算步 */
+      const prev=stateFor(fromIdx);
+      if(prev.spot) parkFly(prev.spot,false);
+      seqT(()=>showBoard(s.eq, true), prev.spot?450:150);
+      RET[s.eq].forEach((id,k)=>{
+        seqT(()=>flyBack(id, id===10), TW()+1200+k*950);
+      });
+    } else if(s.fin){                             /* 终局 */
+      seqT(()=>{ ring.classList.add('gold'); showFinale(true); }, 500);
+    } else {
+      snapTo(st);
+    }
+  }
+
+  /* 文案与界面 */
+  $('stTime').textContent=s.tm||'';
+  $('stTitle').textContent=s.ti||'';
+  const b = s.out ? BLOCKS[s.out-1] : null;
+  $('narr').innerHTML = s.narr || (b ? autoNarr(b) : (s.eq!==undefined&&s.eq!==null ? EQ[s.eq].say : ''));
+  $('stepCount').textContent=`第 ${idx+1} 步 ／ 共 ${STEPS.length} 步`;
+  $('barFill').style.width=(idx/(STEPS.length-1)*100)+'%';
+  const cc=chapterOf(idx);
+  [...chaptersEl.children].forEach((x,k)=>x.classList.toggle('on',k===cc));
+  $('btnPrev').disabled=(idx===0);
+  $('btnNext').disabled=(idx===STEPS.length-1);
+}
+function autoNarr(b){
+  const CN='①②③④⑤⑥⑦⑧⑨⑩'[b.id-1];
+  return `第${CN}块 <b>${b.name}</b>　<em>${F(b.v)}</em> —— ${b.note}`;
+}
+
+/* ================= 引擎 ================= */
+const chaptersEl=$('chapters');
+CH.forEach(([name,start])=>{
+  const x=document.createElement('button');
+  x.textContent=name; x.onclick=()=>goto(start);
+  chaptersEl.appendChild(x);
+});
+function chapterOf(i){ let c=0; CH.forEach(([_,s],k)=>{ if(i>=s) c=k; }); return c; }
+
+function dwellOf(s){
+  const plain=(s.narr||'').replace(/<[^>]+>/g,'');
+  return (s.extra||0) + (s.dwell || (5200 + plain.length*38)) * spd;
+}
+function schedule(){
+  clearTimeout(tm);
+  if(!playing) return;
+  tm=setTimeout(()=>{
+    if(idx<STEPS.length-1){ show(idx+1); schedule(); }
+    else { playing=false; updPlay(true); }
+  }, TW()+dwellOf(STEPS[idx]));
+}
+function updPlay(end){
+  $('btnPlay').textContent = playing ? '⏸ 暂停' : (end?'▶ 重新播放':(idx>0?'▶ 继续播放':'▶ 开始播放'));
+}
+$('btnPlay').onclick=()=>{
+  if(playing){ playing=false; clearTimeout(tm); }
+  else{
+    if(idx===STEPS.length-1) show(0,true);
+    playing=true; schedule();
+  }
+  updPlay();
+};
+$('btnPrev').onclick=()=>goto(idx-1);
+$('btnNext').onclick=()=>{ const n=idx+1; clearTimeout(tm); show(n); if(playing) schedule(); updPlay(); };
+$('btnRestart').onclick=()=>{ show(0,true); if(playing) schedule(); updPlay(); window.scrollTo({top:0,behavior:'smooth'}); };
+$('btnFull').onclick=()=>{
+  if(document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen?.();
+};
+function goto(i){ clearTimeout(tm); show(i,true); if(playing) schedule(); updPlay(); }
+
+document.querySelectorAll('.speed button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.speed button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    ULTRA=(b.dataset.s==='ultra');
+    spd=ULTRA?1:parseFloat(b.dataset.s);
+    if(playing) schedule();
+  };
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight') $('btnNext').click();
+  else if(e.key==='ArrowLeft') goto(idx-1);
+  else if(e.key===' '){ e.preventDefault(); $('btnPlay').onclick(); }
+});
+window.addEventListener('resize',()=>{ layout(); snapTo(stateFor(idx)); });
+
+/* ================= 启动 ================= */
+layout(); applySpin();
+requestAnimationFrame(loop);
+show(0,true); updPlay();
+</script>
+</body>
+</html>

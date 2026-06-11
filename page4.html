@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>一页看清 · 600万港元订单已完整结算交割</title>
+<style>
+:root{
+  --ink:#1f1b16; --soft:#60574a; --line:#c4baa6;
+  --cinn:#b02c1c; --jade:#166c48; --navy:#28466c; --gold:#9e701a;
+  --boxbg:#fcfaf5; --light:#f6f2e9; --jbg:#f0f8f2; --gbg:#fdf9ee;
+  --serif:"Source Han Serif SC","Noto Serif SC","Songti SC","SimSun",serif;
+  --sans:"Source Han Sans SC","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#fff;color:var(--ink);font-family:var(--sans);padding:28px 18px 60px}
+.page{max-width:1180px;margin:0 auto}
+
+/* 头部 */
+.toprule{height:6px;background:var(--ink);margin-bottom:22px}
+h1{font-family:var(--serif);font-weight:900;letter-spacing:.02em;
+   font-size:clamp(24px,4.2vw,44px);line-height:1.25}
+h1 .lead{color:var(--cinn);font-size:.72em;margin-right:.5em}
+.subrow{display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;
+        margin:12px 0 6px;align-items:baseline}
+.subtitle{font-weight:700;color:var(--soft);font-size:clamp(15px,2.2vw,21px)}
+.caseno{color:var(--navy);font-weight:700;font-size:clamp(13px,1.9vw,17px)}
+.midrule{height:2px;background:var(--line);margin:14px 0 26px}
+
+/* 双栏 */
+.grid{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);gap:34px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+
+/* 节点框 */
+.node{position:relative;border:3px solid var(--ink);border-radius:14px;
+      background:var(--boxbg);padding:22px 24px 20px;margin-top:30px}
+.node:first-child{margin-top:0}
+.tag{position:absolute;top:-15px;left:20px;background:#fff;border:2px solid var(--navy);
+     color:var(--navy);border-radius:999px;padding:2px 14px;font-weight:700;
+     font-size:clamp(12px,1.6vw,15px);white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis}
+.node.jade{border-color:var(--jade);background:var(--jbg);border-width:5px}
+.node.jade .tag{border-color:var(--jade);color:var(--jade)}
+.node.navy{border-color:var(--navy);border-width:4px}
+.node.gold{border-color:var(--gold);background:var(--gbg);border-width:4px}
+.node.gold .tag{border-color:var(--gold);color:var(--gold)}
+.node.plain .tag{border-color:var(--cinn);color:var(--cinn)}
+
+.row1{font-size:clamp(16px,2.4vw,23px);font-weight:700;margin:6px 0}
+.big{font-size:clamp(26px,4.6vw,44px);font-weight:900;font-variant-numeric:tabular-nums}
+.huge{font-size:clamp(34px,6vw,58px);font-weight:900;font-variant-numeric:tabular-nums}
+.j{color:var(--jade)} .r{color:var(--cinn)} .n{color:var(--navy)} .g{color:var(--gold)}
+.note{color:var(--soft);font-size:clamp(13px,1.8vw,16px);margin-top:4px;line-height:1.6}
+.src{color:var(--navy);font-size:clamp(12px,1.7vw,15px)}
+.strong-line{font-weight:700;font-size:clamp(14px,2vw,18px);margin-top:8px}
+
+/* 对勾 */
+.chk{position:absolute;right:18px;top:50%;transform:translateY(-50%);
+     width:34px;height:34px;border-radius:50%;background:var(--jade);flex:none}
+.chk::after{content:"";position:absolute;left:8px;top:9px;width:16px;height:9px;
+            border-left:4px solid #fff;border-bottom:4px solid #fff;transform:rotate(-45deg)}
+
+/* 箭头 */
+.arrow{display:flex;align-items:center;gap:14px;margin:6px 0 6px 56px;min-height:46px}
+.arrow .shaft{width:6px;align-self:stretch;background:var(--ink);position:relative;min-height:40px}
+.arrow .shaft::after{content:"";position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);
+  border:12px solid transparent;border-top:14px solid var(--ink);border-bottom:0}
+.arrow .lab{color:var(--soft);font-weight:700;font-size:clamp(13px,1.9vw,17px)}
+
+/* 表式两列金额 */
+.amts{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:baseline}
+.amts .lab{font-weight:700;font-size:clamp(15px,2.2vw,21px)}
+.amts .val{font-weight:900;font-size:clamp(18px,2.8vw,26px);font-variant-numeric:tabular-nums}
+.amts .mini{grid-column:1/-1;color:var(--soft);font-size:clamp(12px,1.7vw,15px)}
+.sumline{border-top:3px solid var(--ink);margin-top:10px;padding-top:8px}
+
+/* 右栏 */
+.side .node{margin-top:34px}
+.side .node:first-child{margin-top:0}
+hr.inbox{border:none;border-top:2px solid var(--ink);margin:10px 0}
+.concl p{margin:8px 0;line-height:1.65;font-weight:700;font-size:clamp(14px,2vw,17px)}
+.fp{color:var(--soft);font-size:clamp(12px,1.7vw,14px);line-height:1.7;margin-top:26px}
+
+/* 印章 */
+.stampwrap{display:flex;justify-content:center;margin-top:36px}
+.stamp{transform:rotate(-7deg);border:5px solid var(--cinn);border-radius:12px;
+  color:var(--cinn);font-family:var(--serif);font-weight:900;text-align:center;
+  padding:10px 26px;opacity:.93;background:rgba(176,44,28,.04)}
+.stamp .l1{font-size:clamp(26px,4vw,40px);letter-spacing:.12em}
+.stamp .l2{font-size:clamp(17px,2.6vw,26px);letter-spacing:.3em}
+
+/* 页脚 */
+.footrule{height:2px;background:var(--line);margin:46px 0 14px}
+.foot{display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;
+      color:var(--soft);font-size:clamp(12px,1.7vw,14px);line-height:1.7}
+
+@media print{
+  body{padding:0}
+  .node{break-inside:avoid}
+  @page{size:A4;margin:12mm}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="toprule"></div>
+  <h1><span class="lead">一页看清</span>600万港元订单 已完整结算交割</h1>
+  <div class="subrow">
+    <div class="subtitle">资金链 × 股数链 双重勾稽 · 差额 ¥0.00 · 交割终局账户不减反增</div>
+    <div class="caseno">粤01民终16331 号案 · 上诉人证据图示</div>
+  </div>
+  <div class="midrule"></div>
+
+  <div class="grid">
+    <!-- 左：资金链 -->
+    <div class="main">
+      <div class="node">
+        <div class="tag">① 期初 · 10月10日 开盘前</div><div class="chk"></div>
+        <div class="row1">账户现金 ¥99.13 　−　 组合费 ¥0.49</div>
+        <div class="big">＝ 余额 ¥98.64 <span class="src">（被上诉人书面自认）</span></div>
+      </div>
+
+      <div class="arrow"><div class="shaft"></div><div class="lab">9:06:52 委托卖出 20,000 股 · 限价 HK$300</div></div>
+
+      <div class="node">
+        <div class="tag">② 成交 · 9:20:39 场外成交</div><div class="chk"></div>
+        <div class="row1">20,000 股 × HK$300 ＝ <span class="big j">HK$6,000,000</span></div>
+        <div class="note r" style="font-weight:700">已缴香港印花税 ¥5,459.64（仅对「已成交」征收）</div>
+        <div class="strong-line">税费已征 → 成交事实铁定</div>
+      </div>
+
+      <div class="arrow"><div class="shaft"></div><div class="lab">9:24 股份交收划出 · 持股归零</div></div>
+
+      <div class="node">
+        <div class="tag">③ 结算入账 · 10月16日 中国结算 T+2 自动交收</div><div class="chk"></div>
+        <div class="row1">HK$6,000,000 × 结算汇率 0.90994 ＝ ¥5,459,640.00</div>
+        <div class="note r">− 六项费用 ¥10,084.47（印花／佣金／经手／证管／清算／其他）</div>
+        <div class="big j">＝ 净回款 ¥5,449,555.53　自动划入账户</div>
+        <div class="note">客户未存入一分钱 → 货款系交收自动回账 → <b>交割已终局完成</b></div>
+      </div>
+
+      <div class="arrow"><div class="shaft"></div><div class="lab">＋ 原余额 ¥98.64</div></div>
+
+      <div class="node navy">
+        <div class="tag">④ 账户可用资金（资金总盘）</div><div class="chk"></div>
+        <div class="row1">98.64 ＋ 5,449,555.53 ＝</div>
+        <div class="huge n">¥5,449,654.17</div>
+      </div>
+
+      <div class="arrow"><div class="shaft"></div><div class="lab">当日 9:31 — 9:38 资金去向</div></div>
+
+      <div class="node">
+        <div class="tag">⑤ 全部去向 · 两项合计</div><div class="chk"></div>
+        <div class="amts">
+          <div class="lab r">七笔买入</div><div class="val r">¥5,133,444.11</div>
+          <div class="mini">（交割单逐笔可查）</div>
+          <div class="lab r">＋ 暗中回购</div><div class="val r">¥316,210.06</div>
+          <div class="mini r">（9:31 未经授权）</div>
+        </div>
+        <div class="sumline big">＝ ¥5,449,654.17 <span style="font-size:.6em;font-weight:700">　与④资金总盘 分毫相等</span></div>
+      </div>
+
+      <div class="arrow"><div class="shaft"></div><div class="lab"></div></div>
+
+      <div class="node jade">
+        <div class="tag">⑥ 资金恒等式 · 勾稽闭合</div>
+        <div class="row1">5,449,654.17 − 5,133,444.11 − 316,210.06</div>
+        <div class="huge j">＝ ¥0.00 <span style="font-family:var(--serif);font-size:.55em">　零误差</span></div>
+      </div>
+
+      <div class="stampwrap"><div class="stamp"><div class="l1">勾稽相符</div><div class="l2">零误差</div></div></div>
+    </div>
+
+    <!-- 右：旁证三框 -->
+    <div class="side">
+      <div class="node navy">
+        <div class="tag">股数链 · 同步勾稽</div><div class="chk"></div>
+        <div class="row1">9:24 卖出交收后　0 股</div>
+        <div class="row1 r">＋ 暗中回购　20,000 股</div>
+        <div class="row1">＋ 客户买入　92,800 股</div>
+        <hr class="inbox">
+        <div class="big j" style="font-size:clamp(20px,3vw,30px)">＝ 112,800 股　与交割单一致</div>
+      </div>
+
+      <div class="node gold">
+        <div class="tag">交割终局 · 账户反有盈余</div><div class="chk"></div>
+        <div class="note" style="color:var(--ink)">全部交收完成后，账户留存现金</div>
+        <div class="huge g">¥415.05</div>
+        <div class="note">（人民币 99.13 ＋ 港元残值 HK$357.86 折 ¥315.92）</div>
+        <div class="strong-line">期初 ¥99.13 → 终局 ¥415.05</div>
+        <div class="big j" style="font-size:clamp(22px,3.4vw,32px)">不减反增 ＋¥315.92</div>
+        <div class="strong-line g" style="font-family:var(--serif);font-size:clamp(17px,2.6vw,24px)">客户分文不欠，反有盈余</div>
+      </div>
+
+      <div class="node plain concl" style="background:var(--light)">
+        <div class="tag">结　论</div>
+        <p>一、税费已征 — 交易已真实成交；</p>
+        <p>二、货款由中国结算 T+2 自动入账 — 600万港元订单已完整结算交割；</p>
+        <p>三、资金、股数双链勾稽，差额 ¥0.00 — 零误差，且账户终有盈余。</p>
+      </div>
+
+      <div class="fp">四枚数据指纹备查：收费必有交易 ／ 深夜两次改扣并删除记录 ／ 凭空记账 ¥0.09 ／ 缺口＝回购成本（差额 0.00）</div>
+    </div>
+  </div>
+
+  <div class="footrule"></div>
+  <div class="foot">
+    <div>本页全部数字均出自被上诉人书面司法自认、官方交割单与中国结算交收记录，可逐项核对，无一出自上诉人臆测。</div>
+    <div>上诉人 谨呈 · 2026年6月</div>
+  </div>
+</div>
+</body>
+</html>
